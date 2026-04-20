@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --color-sand: #edf0ed;
+  --color-paper: #f8faf8;
+  --color-ink: #18242d;
+  --color-mist: #5f6d76;
+  --color-line: rgba(24, 36, 45, 0.11);
+  --color-accent: #184e63;
+  --color-accent-soft: rgba(24, 78, 99, 0.1);
+  --color-teal: #225b55;
+  --color-teal-soft: rgba(34, 91, 85, 0.1);
+  --shadow-panel: 0 24px 70px rgba(28, 39, 49, 0.08);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  html {
+    background:
+      radial-gradient(circle at top left, rgba(24, 78, 99, 0.1), transparent 32%),
+      radial-gradient(circle at bottom right, rgba(34, 91, 85, 0.12), transparent 28%),
+      var(--color-sand);
+    color: var(--color-ink);
+    font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background: transparent;
+    color: var(--color-ink);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .panel-surface {
+    background: rgba(248, 250, 248, 0.92);
+    border: 1px solid var(--color-line);
+    box-shadow: var(--shadow-panel);
+    backdrop-filter: blur(18px);
+  }
+
+  .grid-paper {
+    background-image:
+      linear-gradient(rgba(28, 39, 49, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(28, 39, 49, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}

@@ -1,0 +1,31 @@
+# Caso multi-planta: edificio residencial de 3 plantas con un núcleo vertical
+
+solar:
+  id: solar-edificio-3-plantas
+  contour:
+    - {x: 0, y: 0}
+    - {x: 45, y: 0}
+    - {x: 45, y: 45}
+    - {x: 0, y: 45}
+  north_angle_deg: 0.0
+  max_buildable_height_m: 12.0
+
+program:
+  project_id: edificio-3-plantas
+  num_floors: 3
+  floor_height_m: 3.0
+  typologies:
+    - id: T2
+      name: Vivienda dos dormitorios
+      min_useful_area: 70.0
+      max_useful_area: 90.0
+      num_bedrooms: 2
+      num_bathrooms: 1
+      rooms:
+        - {type: LIVING,   min_area: 20.0, min_short_side: 3.5}
+        - {type: KITCHEN,  min_area: 10.0, min_short_side: 2.5}
+        - {type: BEDROOM,  min_area: 12.0, min_short_side: 2.8}
+        - {type: BEDROOM,  min_area: 10.0, min_short_side: 2.5}
+        - {type: BATHROOM, min_area:  4.0, min_short_side: 1.5}
+  mix:
+    - {typology_id: T2, count: 18}

@@ -1,0 +1,41 @@
+# Caso grande de Fase 3: 8 plantas, 60 unidades y parking subterráneo
+
+solar:
+  id: solar-edificio-8-plantas-60-unidades-con-parking
+  contour:
+    - {x: 0, y: 0}
+    - {x: 90, y: 0}
+    - {x: 90, y: 90}
+    - {x: 0, y: 90}
+  north_angle_deg: 0.0
+  max_buildable_height_m: 27.0
+
+program:
+  project_id: edificio-8-plantas-60-unidades-con-parking
+  num_floors: 8
+  floor_height_m: 3.0
+  typologies:
+    - id: T2
+      name: Vivienda dos dormitorios
+      min_useful_area: 70.0
+      max_useful_area: 90.0
+      num_bedrooms: 2
+      num_bathrooms: 1
+      rooms:
+        - {type: LIVING,   min_area: 20.0, min_short_side: 3.5}
+        - {type: KITCHEN,  min_area: 10.0, min_short_side: 2.5}
+        - {type: BEDROOM,  min_area: 12.0, min_short_side: 2.8}
+        - {type: BEDROOM,  min_area: 10.0, min_short_side: 2.5}
+        - {type: BATHROOM, min_area:  4.0, min_short_side: 1.5}
+  mix:
+    - {typology_id: T2, count: 60}
+
+parking:
+  enabled: true
+  spaces_per_unit: 1.0
+  accessible_ratio: 0.05
+  lane_width_m: 5.0
+  turning_radius_m: 6.0
+  ramp_width_m: 3.5
+  ramp_length_m: 12.0
+  ramp_slope_pct: 15.0

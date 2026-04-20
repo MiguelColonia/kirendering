@@ -1,0 +1,319 @@
+{
+  "app": {
+    "title": "Cimiento",
+    "subtitle": "Lokaler Copilot für Grundstück, Grundriss, Wohneinheit und IFC.",
+    "technical_stack": "Grundstück · Grundriss · Wohneinheit · Geschoss · Nutzfläche · Treppenhaus · Tiefgarage",
+    "tagline": "Architekturwerkzeug"
+  },
+  "nav": {
+    "landing": "Start",
+    "projects": "Projekte",
+    "editor": "Projekteditor",
+    "new_project": "Neues Projekt"
+  },
+  "common": {
+    "loading": "Wird geladen…",
+    "save": "Speichern",
+    "create": "Erstellen",
+    "update": "Aktualisieren",
+    "retry": "Erneut versuchen",
+    "empty": "Keine Daten verfügbar.",
+    "status": "Status",
+    "details": "Details",
+    "open": "Öffnen",
+    "edit": "Bearbeiten",
+    "download": "Herunterladen",
+    "cancel": "Abbrechen",
+    "close": "Schließen"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Phase 4 / Weboberfläche",
+      "title": "Wohnprojekte präzise anlegen, versionieren und weiterführen.",
+      "description": "Cimiento bündelt Projektanlage, Grundstücksdaten und den Einstieg in die weitere Bearbeitung in einer zurückhaltenden Oberfläche für ein Architekturbüro.",
+      "primary_action": "Neues Projekt",
+      "secondary_action": "Projektliste öffnen"
+    },
+    "cards": {
+      "create": {
+        "title": "Schneller Projektstart",
+        "description": "Ein neues Projekt wird mit einem belastbaren Startsatz aus Grundstück und Wohnprogramm angelegt und sofort im System versioniert."
+      },
+      "list": {
+        "title": "Klarer Projektbestand",
+        "description": "Alle Projekte liegen in einer nüchternen Übersicht mit Erstellungsdatum, Status und direktem Zugang zum Editor."
+      }
+    },
+    "highlights": {
+      "eyebrow": "Arbeitsmodus",
+      "body": "Die erste Ausbaustufe konzentriert sich auf Projektanlage und Bestandspflege. Der eigentliche Editor folgt im nächsten Schritt, die Navigation und Datenbasis sind dafür bereits stabil vorbereitet."
+    },
+    "metrics": {
+      "projects_label": "Projektstart",
+      "projects_value": "01 Klick",
+      "workflow_label": "Statusmodell",
+      "workflow_value": "Entwurf zuerst"
+    }
+  },
+  "projects": {
+    "list": {
+      "title": "Projekte",
+      "description": "Gespeicherte Projekte aus dem Backend mit Status, Erstellungsdatum und direktem Zugang zum Editor.",
+      "search_placeholder": "Nach Projektname suchen",
+      "empty": "Noch keine Projekte vorhanden.",
+      "offline": "Die Projektliste konnte nicht geladen werden.",
+      "latest_version": "Aktuelle Version",
+      "updated_at": "Zuletzt geändert"
+    },
+    "table": {
+      "columns": {
+        "name": "Name",
+        "created_at": "Erstellt am",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "open_action": "Öffnen",
+      "empty_description": "Keine Beschreibung hinterlegt."
+    },
+    "status": {
+      "draft": "Entwurf",
+      "feasible": "Lösbar",
+      "optimal": "Optimiert",
+      "infeasible": "Nicht lösbar",
+      "timeout": "Zeitlimit",
+      "error": "Fehler",
+      "unknown": "Unbekannt"
+    }
+  },
+  "project_create": {
+    "trigger": "Neues Projekt",
+    "eyebrow": "Projekt anlegen",
+    "title": "Neues Projekt erstellen",
+    "description": "Legen Sie zunächst nur Name und Beschreibung an. Cimiento ergänzt einen belastbaren Startdatensatz, damit der Editor im nächsten Schritt direkt arbeiten kann.",
+    "fields": {
+      "name": "Projektname",
+      "description": "Beschreibung"
+    },
+    "submit": "Projekt erstellen",
+    "error": "Das Projekt konnte nicht angelegt werden."
+  },
+  "project_editor": {
+    "title": "Projekteditor",
+    "eyebrow": "Projektübersicht",
+    "new_title": "Neues Projekt anlegen",
+    "edit_title": "Projekt bearbeiten",
+    "name": "Projektname",
+    "description": "Beschreibung",
+    "save_new": "Projekt erstellen",
+    "save_existing": "Neue Version speichern",
+    "save_success": "Projekt erfolgreich gespeichert.",
+    "save_error": "Projekt konnte nicht gespeichert werden.",
+    "back_to_list": "Zur Projektliste",
+    "description_fallback": "Noch keine Projektbeschreibung hinterlegt.",
+    "version_label": "Version {{count}}",
+    "meta": {
+      "created_at": "Erstellt am",
+      "updated_at": "Zuletzt geändert",
+      "floors": "Geschosse",
+      "units": "Wohneinheiten"
+    },
+    "workspace_title": "Projektarbeitsbereich",
+    "workspace_description": "Bearbeiten Sie das Wohnprogramm dieser Projektversion oder prüfen Sie ein generiertes IFC-Modell in derselben Oberfläche.",
+    "tabs": {
+      "program": "Programm",
+      "model": "Modell"
+    }
+  },
+  "solar_editor": {
+    "title": "Grundstückseditor",
+    "description": "Bearbeiten Sie das Grundstück als Polygon direkt im Canvas. Die Eckpunkte lassen sich ziehen.",
+    "area": "Grundstücksfläche",
+    "vertices": "Eckpunkte",
+    "validation": {
+      "polygon_too_small": "Das Grundstückspolygon ist zu klein.",
+      "polygon_ok": "Das Grundstück ist für einen frühen Entwurf plausibel."
+    }
+  },
+  "program_editor": {
+    "title": "Wohnprogramm",
+    "description": "Konfigurieren Sie Typologien, den Wohnungsmix und die Geschossparameter für diese Projektversion.",
+    "floors": "Geschosse",
+    "floor_height": "Geschosshöhe",
+    "unit_count": "Wohneinheiten",
+    "min_area": "Minimale Nutzfläche",
+    "max_area": "Maximale Nutzfläche",
+    "units_per_floor": "Wohneinheiten pro Geschoss",
+    "typology_name": "Typologiebezeichnung",
+    "save_success": "Das Wohnprogramm wurde als neue Projektversion gespeichert.",
+    "save_error": "Das Wohnprogramm konnte nicht gespeichert werden.",
+    "actions": {
+      "add_typology": "Typologie hinzufügen",
+      "save_program": "Programm speichern",
+      "edit_typology": "Bearbeiten",
+      "delete_typology": "Löschen"
+    },
+    "summary": {
+      "typologies": "Typologien",
+      "units": "Einheiten gesamt",
+      "floors": "Geschosse",
+      "floor_height": "Geschosshöhe in m"
+    },
+    "subviews": {
+      "typologies": "Typologien",
+      "mix": "Mix"
+    },
+    "typology_list": {
+      "empty": "Es sind noch keine Typologien definiert.",
+      "untitled": "Unbenannte Typologie",
+      "bedrooms": "{{count}} Schlafzimmer",
+      "bathrooms": "{{count}} Badezimmer",
+      "area_range": "{{min}} bis {{max}} m² Nutzfläche"
+    },
+    "typology_dialog": {
+      "eyebrow": "Typologie",
+      "create_title": "Typologie anlegen",
+      "edit_title": "Typologie bearbeiten",
+      "submit": "Typologie übernehmen",
+      "add_room": "Raum hinzufügen",
+      "remove_room": "Raum entfernen",
+      "sections": {
+        "basics": "Grunddaten",
+        "areas": "Flächen",
+        "rooms": "Räume"
+      },
+      "fields": {
+        "name": "Name",
+        "id": "Typologie-ID",
+        "bedrooms": "Schlafzimmer",
+        "bathrooms": "Badezimmer",
+        "min_area": "Min. Nutzfläche in m²",
+        "max_area": "Max. Nutzfläche in m²",
+        "room_type": "Raumtyp",
+        "room_min_area": "Min. Fläche in m²",
+        "room_min_short_side": "Min. kurze Seite in m"
+      }
+    },
+    "mix": {
+      "columns": {
+        "typology": "Typologie",
+        "id": "Typologie-ID",
+        "count": "Einheiten"
+      },
+      "total_units": "Gesamtzahl der Einheiten: {{count}}"
+    },
+    "validation": {
+      "required": "Dieses Feld ist erforderlich.",
+      "positive_number": "Bitte geben Sie eine positive Zahl ein.",
+      "non_negative_integer": "Bitte geben Sie eine ganze Zahl größer oder gleich 0 ein.",
+      "bathrooms_minimum": "Mindestens ein Badezimmer ist erforderlich.",
+      "rooms_required": "Mindestens ein Raum ist erforderlich.",
+      "living_required": "Mindestens ein Raum vom Typ Wohnen ist erforderlich.",
+      "area_range": "Die minimale Nutzfläche muss kleiner als die maximale Nutzfläche sein.",
+      "typology_id_unique": "Diese Typologie-ID ist bereits vergeben.",
+      "room_type_required": "Bitte wählen Sie einen gültigen Raumtyp.",
+      "typologies_required": "Mindestens eine Typologie ist erforderlich.",
+      "mix_required": "Der Mix darf nicht leer sein.",
+      "mix_minimum": "Die Anzahl muss mindestens 1 sein.",
+      "mix_unknown_typology": "Der Mix verweist auf eine unbekannte Typologie.",
+      "mix_missing_entry": "Für jede Typologie muss ein Mixeintrag vorhanden sein.",
+      "floors_minimum": "Mindestens ein Geschoss ist erforderlich."
+    }
+  },
+  "room_types": {
+    "LIVING": "Wohnen",
+    "KITCHEN": "Küche",
+    "BEDROOM": "Schlafzimmer",
+    "BATHROOM": "Badezimmer",
+    "CORRIDOR": "Flur",
+    "STORAGE": "Abstellraum",
+    "PARKING": "Stellplatz"
+  },
+  "generation": {
+    "title": "Generierung",
+    "description": "Solver, Builder und Exporte können direkt aus der Oberfläche gestartet werden.",
+    "start": "Generierung starten",
+    "events": "Ereignisprotokoll",
+    "queued": "In Warteschlange",
+    "running": "Läuft",
+    "finished": "Abgeschlossen",
+    "failed": "Fehlgeschlagen",
+    "idle": "Bereit",
+    "solver_started": "Solver gestartet",
+    "solver_progress": "Solver meldet Fortschritt",
+    "solver_finished": "Solver abgeschlossen",
+    "builder_started": "Builder gestartet",
+    "export_started": "Exportphase gestartet",
+    "job": "Auftrag"
+  },
+  "ifc_viewer": {
+    "title": "IFC-Modell",
+    "description": "Visualisieren Sie das generierte IFC im Browser, navigieren Sie durch den Modellbaum und prüfen Sie Eigenschaften einzelner Elemente.",
+    "loading": "IFC-Modell wird geladen…",
+    "error": "Das IFC-Modell konnte nicht geladen werden.",
+    "error_detail": "Prüfen Sie, ob die IFC-Datei für diese Projektversion vorhanden und lesbar ist.",
+    "model_tab_hint": "Die Registerkarte Modell erscheint, sobald für diese Projektversion ein IFC generiert wurde.",
+    "tree": {
+      "title": "Modellbaum",
+      "description": "Der Baum folgt der räumlichen IFC-Struktur. Für größere Modelle bleiben Äste standardmäßig eingeklappt.",
+      "empty": "Kein Modellbaum verfügbar.",
+      "root": "Projekt"
+    },
+    "controls": {
+      "fit": "Gesamtansicht",
+      "projection": "Projektion",
+      "perspective": "Perspektive",
+      "orthographic": "Orthografisch",
+      "instructions_title": "Kamerasteuerung",
+      "instructions": "Orbit mit linker Maustaste, Pan mit rechter Maustaste und Zoom mit dem Mausrad."
+    },
+    "section": {
+      "title": "Horizontaler Schnitt",
+      "all": "Kein Schnitt",
+      "floor": "Geschoss {{index}}"
+    },
+    "properties": {
+      "title": "Eigenschaften",
+      "local_id": "Lokale ID",
+      "empty": "Wählen Sie ein Element im Modell oder im Baum aus, um IFC-Eigenschaften anzuzeigen."
+    },
+    "downloads": {
+      "title": "Downloads",
+      "ifc": "IFC herunterladen",
+      "dxf": "DXF herunterladen",
+      "xlsx": "XLSX herunterladen"
+    },
+    "categories": {
+      "IFCPROJECT": "Projekt",
+      "IFCSITE": "Grundstück",
+      "IFCBUILDING": "Gebäude",
+      "IFCBUILDINGSTOREY": "Geschoss",
+      "IFCSPACE": "Raum",
+      "IFCWALL": "Wand",
+      "IFCWALLSTANDARDCASE": "Wand",
+      "IFCDOOR": "Tür",
+      "IFCWINDOW": "Fenster",
+      "IFCSLAB": "Decke",
+      "IFCSTAIR": "Treppe",
+      "IFCTRANSPORTELEMENT": "Aufzug",
+      "IFCOPENINGELEMENT": "Öffnung",
+      "IFCROOF": "Dach",
+      "IFCCOLUMN": "Stütze",
+      "IFCBEAM": "Träger",
+      "UNKNOWN": "Element",
+      "unknown": "Element"
+    }
+  },
+  "viewer": {
+    "title": "Projektansicht",
+    "summary": "Projektübersicht",
+    "outputs": "Ausgaben",
+    "no_outputs": "Noch keine Ausgaben vorhanden.",
+    "current_version": "Aktuelle Version",
+    "downloads": {
+      "ifc": "IFC herunterladen",
+      "dxf": "DXF herunterladen",
+      "xlsx": "XLSX herunterladen",
+      "svg": "SVG herunterladen"
+    }
+  }
+}
