@@ -11,7 +11,10 @@ class Settings(BaseSettings):
 
     # Ollama
     ollama_host: str = "http://localhost:11434"
+    ollama_model_reasoning: str = "qwen2.5:14b-instruct-q4_K_M"
+    ollama_model_fast: str = "qwen2.5:7b-instruct-q4_K_M"
     ollama_model_chat: str = "qwen2.5:7b-instruct-q4_K_M"
+    ollama_model_coder: str = "qwen2.5-coder:7b-instruct-q4_K_M"
     ollama_model_embed: str = "nomic-embed-text"
 
     # Qdrant
