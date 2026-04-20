@@ -45,23 +45,25 @@ cd backend && ruff format .
 
 ## 6. Estado actual
 
-**Fase 3 — Geometría avanzada y solver con dimensiones variables.**
+**Fase 4 completada. Siguiente foco: Fase 5 — copiloto conversacional sobre una base web ya usable.**
 
-Las Fases 1 y 2 están completadas (92 tests pasando):
+Las Fases 1 a 4 dejan ya un producto operable en local:
 - Fase 1: schemas Pydantic v2, solver CP-SAT con `AddNoOverlap2D`.
 - Fase 2: schemas arquitectónicos, builder `Solution→Building`, exportación IFC4/DXF/XLSX.
+- Fase 3: soporte operativo de solares poligonales, comunicación vertical y mejoras geométricas clave.
+- Fase 4: FastAPI + frontend React/TypeScript en alemán, generación con WebSocket, visor IFC y descargas.
 
-Los outputs de referencia están en `data/outputs/rectangular_simple.*` (IFC, DXF, XLSX, SVG).
+Los outputs de referencia siguen en `data/outputs/rectangular_simple.*` y la API genera outputs versionados en `backend/data/outputs/api/`.
 
-El trabajo en curso en Fase 3 se centra en:
-1. Geometría de solares irregulares (polígonos no rectangulares).
-2. Muros diagonales y `IfcOpeningElement` con corte booleano real.
-3. Solver con dimensiones variables (`AddMultiplicationEquality`).
-4. Núcleos de comunicación vertical (escaleras, ascensores).
+El siguiente trabajo debe concentrarse en:
+1. Orquestación conversacional con LangGraph y Ollama.
+2. Tool-calling validado con Pydantic hacia solver, builder y validadores.
+3. UX conversacional sobre el flujo ya existente de proyectos, versiones y generación.
 
 ## 7. Qué NO hacer todavía
 
-- No escribir código de LLM ni agentes (`src/cimiento/llm/`). Eso es Fase 5.
-- No escribir endpoints FastAPI (`src/cimiento/api/`). Eso es Fase 4.
-- No escribir frontend. No hay decisiones tomadas aún sobre la UI.
-- No añadir dimensiones variables al solver hasta que la capa geometry esté lista (Fase 3).
+- No implementar RAG normativo todavía (`src/cimiento/rag/`). Eso es Fase 6.
+- No implementar ingesta visual de planos (`src/cimiento/vision/`). Eso es Fase 7.
+- No implementar render fotorrealista. Eso es Fase 8.
+- No romper la separación de capas: el LLM puede orquestar, pero no resolver geometría.
+- No añadir dependencias backend sin justificación y aprobación explícita.

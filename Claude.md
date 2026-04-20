@@ -86,20 +86,25 @@ Considerar estas restricciones al proponer soluciones: nada de modelos que no qu
 - Lint: `cd backend && ruff check .`
 - Formato: `cd backend && ruff format .`
 - Type-check: `cd backend && mypy src/`
+- Frontend lint: `cd frontend && npm run lint`
+- Frontend build: `cd frontend && npm run build`
 - Listar modelos Ollama: `ollama list`
-- Levantar infraestructura: `cd infra/docker && docker compose up -d`
+- Levantar producto base: `cd infra/docker && docker compose up --build -d`
+- Levantar servicios IA opcionales: `cd infra/docker && docker compose --profile ai up -d`
 - Detener infraestructura: `cd infra/docker && docker compose down`
 
 ## Estado actual
 
-Fase 1 — Solver aislado con OR-Tools CP-SAT.
+Fase 4 completada. El producto base es usable en local sin copiloto de IA.
+
+Próximo foco: Fase 5 — Copiloto conversacional con LangGraph y Ollama sobre la API y la UI ya operativas.
 
 ## Fases del proyecto
 
-- [ ] **Fase 1**: Solver aislado. Schemas Pydantic, solver CP-SAT para planta rectangular, visualización SVG.
-- [ ] **Fase 2**: Geometría y exportación BIM. Shapely para 2D, IfcOpenShell para IFC (canónico), ezdxf para DXF derivado, openpyxl para reportes.
-- [ ] **Fase 3**: Complejidad real. Multi-planta, núcleos de comunicación vertical, aparcamiento subterráneo, solares no rectangulares.
-- [ ] **Fase 4**: Web básica. FastAPI, visor IFC.js navegable, frontend React mínimo, upload de solar, descarga de outputs.
+- [x] **Fase 1**: Solver aislado. Schemas Pydantic, solver CP-SAT para planta rectangular, visualización SVG.
+- [x] **Fase 2**: Geometría y exportación BIM. Shapely para 2D, IfcOpenShell para IFC (canónico), ezdxf para DXF derivado, openpyxl para reportes.
+- [x] **Fase 3**: Complejidad real. Multi-planta, núcleos de comunicación vertical, aparcamiento subterráneo, solares no rectangulares.
+- [x] **Fase 4**: Web básica. FastAPI, visor IFC navegable, frontend React, upload/edición de solar, generación y descarga de outputs.
 - [ ] **Fase 5**: Copiloto conversacional. LangGraph con agentes, tool-calling hacia el solver, ciclos de validación.
 - [ ] **Fase 6**: RAG normativo. Indexación en Qdrant del CTE y ordenanzas, agente normativo consultando contra la base vectorial.
 - [ ] **Fase 7**: Ingesta visual (Capa 0). Modelo de visión + OpenCV para convertir planos JPG/PNG en geometría base. Integración con el solver como input opcional.
@@ -107,14 +112,11 @@ Fase 1 — Solver aislado con OR-Tools CP-SAT.
 
 ## Qué NO hacer en la fase actual
 
-- No escribir código de agentes LLM ni invocaciones a Ollama (pertenece a Fase 5).
-- No escribir endpoints FastAPI ni código de API (pertenece a Fase 4).
-- No escribir nada del frontend (pertenece a Fase 4).
 - No crear código de RAG ni indexación vectorial (pertenece a Fase 6).
 - No implementar ingesta visual de planos (pertenece a Fase 7).
 - No implementar pipeline de render fotorrealista (pertenece a Fase 8).
 - No añadir dependencias al `pyproject.toml` sin consultar.
-- No implementar solares no rectangulares todavía; está marcado como TODO explícito hasta la Fase 3.
+- No romper la regla de oro: el LLM orquesta, pero no calcula geometría ni optimización.
 
 ## Cómo colaborar con el usuario
 

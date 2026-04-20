@@ -229,21 +229,63 @@
     "PARKING": "Stellplatz"
   },
   "generation": {
-    "title": "Generierung",
-    "description": "Solver, Builder und Exporte können direkt aus der Oberfläche gestartet werden.",
-    "start": "Generierung starten",
+    "title": "Entwurfsgenerierung",
+    "description": "Starten Sie Solver, BIM-Aufbau und Export direkt aus der Projektansicht und verfolgen Sie den Fortschritt live über den Job-Stream.",
+    "start": "Entwurf generieren",
     "events": "Ereignisprotokoll",
     "queued": "In Warteschlange",
     "running": "Läuft",
     "finished": "Abgeschlossen",
     "failed": "Fehlgeschlagen",
     "idle": "Bereit",
+    "phase_title": "Phasen",
     "solver_started": "Solver gestartet",
     "solver_progress": "Solver meldet Fortschritt",
     "solver_finished": "Solver abgeschlossen",
     "builder_started": "Builder gestartet",
     "export_started": "Exportphase gestartet",
-    "job": "Auftrag"
+    "job": "Auftrag",
+    "not_started": "Noch nicht gestartet",
+    "duration": "Dauer",
+    "started_at": "Begonnen",
+    "start_error": "Der Entwurf konnte nicht gestartet werden.",
+    "failed_detail_fallback": "Die Generierung konnte nicht abgeschlossen werden.",
+    "connection_lost": "Die Live-Verbindung wurde unterbrochen. Es wird automatisch erneut verbunden.",
+    "connection": {
+      "title": "Live-Stream",
+      "idle": "Nicht verbunden",
+      "connecting": "Verbindung wird aufgebaut…",
+      "connected": "Live-Verbindung aktiv",
+      "reconnecting": "Verbindung wird wiederhergestellt…",
+      "closed": "Stream abgeschlossen",
+      "error": "Verbindung gestört"
+    },
+    "step_status": {
+      "pending": "Wartet",
+      "running": "Läuft",
+      "success": "Fertig",
+      "error": "Fehler"
+    },
+    "steps": {
+      "solver": {
+        "title": "Solver",
+        "description": "Prüft, ob auf dem Grundstück eine machbare räumliche Lösung berechnet werden kann."
+      },
+      "builder": {
+        "title": "BIM-Aufbau",
+        "description": "Überführt die Solver-Lösung in ein konsistentes Gebäudemodell."
+      },
+      "export": {
+        "title": "Export",
+        "description": "Erzeugt IFC, DXF, XLSX und die SVG-Vorschau für diese Version."
+      }
+    },
+    "infeasible": {
+      "title": "Keine machbare Lösung gefunden",
+      "description": "Passen Sie die Randbedingungen an und starten Sie die Generierung erneut.",
+      "suggestion_reduce_units": "Wohneinheiten reduzieren",
+      "suggestion_expand_site": "Grundstück vergrößern"
+    }
   },
   "ifc_viewer": {
     "title": "IFC-Modell",
@@ -256,7 +298,16 @@
       "title": "Modellbaum",
       "description": "Der Baum folgt der räumlichen IFC-Struktur. Für größere Modelle bleiben Äste standardmäßig eingeklappt.",
       "empty": "Kein Modellbaum verfügbar.",
-      "root": "Projekt"
+      "root": "Projekt",
+      "performance_hint": "Große IFC-Modelle werden geschossweise fokussiert, damit Navigation und Auswahl flüssig bleiben.",
+      "node_count": "{{count}} Knoten"
+    },
+    "storeys": {
+      "title": "Geschosse",
+      "all_model": "Gesamtmodell",
+      "page": "Seite {{current}} von {{total}}",
+      "previous_page": "Vorherige Geschosse",
+      "next_page": "Nächste Geschosse"
     },
     "controls": {
       "fit": "Gesamtansicht",
@@ -274,6 +325,8 @@
     "properties": {
       "title": "Eigenschaften",
       "local_id": "Lokale ID",
+      "type": "Typ",
+      "attribute_count": "{{count}} Attribute",
       "empty": "Wählen Sie ein Element im Modell oder im Baum aus, um IFC-Eigenschaften anzuzeigen."
     },
     "downloads": {
