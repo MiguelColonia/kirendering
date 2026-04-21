@@ -40,6 +40,21 @@ Cuándo y bajo qué condiciones debería revisarse esta decisión.
 ## Registro de decisiones
 <!-- Las más recientes primero -->
 
+### ADR-0011 — Arquitectura RAG local y chunking por artículo para normativa alemana
+**Fecha:** 2026-04-21
+**Estado:** aceptada
+**Documento:** docs/decisions/0011-arquitectura-rag-y-chunking-normativo.md
+
+### ADR-0010 — El agente normativo no razona: solo recupera y cita
+**Fecha:** 2026-04-21
+**Estado:** aceptada
+**Documento:** docs/decisions/0010-agente-normativo-sin-razonamiento.md
+
+### ADR-0009 — Arquitectura de agentes: LangGraph, nodos y asignación de modelos por rol
+**Fecha:** 2026-04-21
+**Estado:** aceptada
+**Documento:** docs/decisions/0009-arquitectura-de-agentes-langgraph.md
+
 ### ADR-0008 — Cliente Ollama y modelos por rol
 **Fecha:** 2026-04-20
 **Estado:** aceptada

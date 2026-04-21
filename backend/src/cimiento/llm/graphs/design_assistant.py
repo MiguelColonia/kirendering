@@ -15,6 +15,7 @@ La geometría y la optimización son responsabilidad exclusiva del solver CP-SAT
 from __future__ import annotations
 
 import logging
+import re
 from typing import Annotated, Any
 
 from langgraph.checkpoint.memory import MemorySaver
@@ -31,6 +32,7 @@ from cimiento.llm.tools.suggest_typology_adjustments import (
     AdjustmentResult,
     suggest_typology_adjustments,
 )
+from cimiento.rag.retriever import format_chunks_for_llm, retrieve
 from cimiento.schemas.geometry_primitives import Point2D, Polygon2D
 from cimiento.schemas.program import Program, TypologyMix
 from cimiento.schemas.solar import Solar
@@ -217,6 +219,70 @@ Regeln:
     • Barrierefreiheit (MBO § 50: bei > 2 Wohnungen mind. 1 Geschoss barrierefrei)
     • GRZ und GFZ nach BauNVO
 - Antworte NUR mit dem JSON, ohne Erklärungen außerhalb des JSON."""
+
+_ANSWER_SYSTEM = """\
+Du bist ein Normenauskunft-Assistent für das deutsche Baurecht.
+
+STRENGE REGELN — KEIN SPIELRAUM:
+1. Du antwortest AUSSCHLIESSLICH auf Basis des dir übergebenen KONTEXTS.
+2. Du darfst keinerlei eigenes Wissen, Schätzungen oder Annahmen einfließen lassen.
+3. Wenn die Antwort nicht vollständig im bereitgestellten Kontext enthalten ist, antworte:
+   "Diese Information liegt mir im bereitgestellten Kontext nicht vor. \
+Bitte konsultieren Sie die aktuelle Fassung der einschlägigen Rechtsnorm."
+4. JEDE Aussage aus dem Kontext MUSS eine Quellenangabe in eckigen Klammern enthalten.
+
+Format der Quellenangaben:
+  [GEG §N]      für Artikel des Gebäudeenergiegesetzes
+  [MBO §N]      für Artikel der Musterbauordnung
+  [BauNVO §N]   für Artikel der Baunutzungsverordnung
+  [GEG Anlage N] für Anlagen des GEG
+
+Antworte ausschließlich auf Deutsch. Zitiere wörtlich, wenn es auf den genauen Wortlaut ankommt."""
+
+# ---------------------------------------------------------------------------
+# Clasificador de intención: consulta normativa vs. petición de diseño
+# ---------------------------------------------------------------------------
+
+_REGULATION_DOC_RE = re.compile(
+    r"\b(GEG|MBO|BauNVO|WoFlV|LBO(?:_\w+)?|DIN\s*18040)\b", re.IGNORECASE
+)
+_DIMENSION_RE = re.compile(r"\d+\s*[x×]\s*\d+")
+
+
+def _is_regulation_query(message: str) -> bool:
+    """
+    Detecta si el mensaje es una consulta normativa directa (§, GEG, MBO…) y no
+    una petición de diseño con dimensiones de solar.
+
+    Indicadores fuertes de consulta normativa: símbolo § o referencia explícita
+    a un documento (GEG, MBO, BauNVO, WoFlV, LBO, DIN 18040).
+    Una petición con dimensiones de solar (20x30) se trata siempre como diseño,
+    aunque mencione normativa.
+    """
+    if _DIMENSION_RE.search(message):
+        return False
+    if "§" in message:
+        return True
+    return bool(_REGULATION_DOC_RE.search(message))
+
+
+def _mock_regulation_context(query: str) -> str:
+    """
+    Contexto mock para consultas normativas cuando Qdrant no está disponible.
+
+    Formatea los ítems del fallback mock en el mismo estilo que format_chunks_for_llm,
+    de modo que el sistema de citas del LLM funcione igual en dev sin Qdrant.
+    """
+    from cimiento.llm.tools.query_regulation import _mock_query
+
+    result = _mock_query(query)
+    lines: list[str] = []
+    for item in result.items:
+        lines.append(f"[{item.code}] {item.description}")
+        lines.append(item.value)
+        lines.append(f"Quelle: {item.source}")
+        lines.append("")
+    return "\n".join(lines).strip() or "(Keine relevanten Normvorschriften gefunden.)"
 
 
 # ---------------------------------------------------------------------------
@@ -499,6 +565,75 @@ def build_graph(
             return "handle_infeasible"
         return "interpret_result"
 
+    def _route_from_start(state: DesignAssistantState) -> str:
+        """
+        Enruta desde START: consultas normativas directas van a answer_with_regulation;
+        peticiones de diseño van a extract_requirements.
+        """
+        if _is_regulation_query(state.get("user_message", "")):
+            return "answer_with_regulation"
+        return "extract_requirements"
+
+    # ------------------------------------------------------------------
+    # Nodo 6: answer_with_regulation
+    # ------------------------------------------------------------------
+
+    async def answer_with_regulation(state: DesignAssistantState) -> dict[str, Any]:
+        """
+        Responde consultas normativas directas mediante RAG sobre Qdrant.
+
+        Principio de diseño: el LLM no razona ni asume sobre normativa.
+        Solo recibe los artículos recuperados como contexto de solo lectura
+        y genera una respuesta en alemán con citas estrictas en formato [DOC §N].
+        Si Qdrant no está disponible, el fallback mock formatea los datos
+        de la misma manera, garantizando el comportamiento de citas.
+        """
+        query = state["user_message"]
+
+        if qdrant_client is not None:
+            try:
+                results = await retrieve(
+                    query=query,
+                    ollama_client=client,
+                    qdrant_client=qdrant_client,
+                    collection_name="normativa",
+                    k=6,
+                )
+                context = format_chunks_for_llm(results)
+            except Exception:
+                log.warning("answer_with_regulation: fallo en RAG; usando mock")
+                context = _mock_regulation_context(query)
+        else:
+            context = _mock_regulation_context(query)
+
+        messages = [
+            {"role": "system", "content": _ANSWER_SYSTEM},
+            {
+                "role": "user",
+                "content": (
+                    f"Kontext aus den Normdokumenten:\n\n{context}\n\n"
+                    f"---\n\nFrage: {query}"
+                ),
+            },
+        ]
+        try:
+            response = await client.chat(messages=messages, role="normative")
+            answer = response.content
+        except Exception as exc:
+            log.warning("answer_with_regulation: fallo del LLM: %s", exc)
+            answer = (
+                "Die Normabfrage konnte nicht abgeschlossen werden. "
+                "Bitte konsultieren Sie die aktuelle Fassung der einschlägigen Rechtsnorm."
+            )
+
+        return {
+            "user_response_de": answer,
+            "messages": [
+                {"role": "user", "content": query},
+                {"role": "assistant", "content": answer},
+            ],
+        }
+
     # ------------------------------------------------------------------
     # Construcción del grafo
     # ------------------------------------------------------------------
@@ -510,8 +645,16 @@ def build_graph(
     builder.add_node("invoke_solver", invoke_solver)
     builder.add_node("interpret_result", interpret_result)
     builder.add_node("handle_infeasible", handle_infeasible)
+    builder.add_node("answer_with_regulation", answer_with_regulation)
 
-    builder.add_edge(START, "extract_requirements")
+    builder.add_conditional_edges(
+        START,
+        _route_from_start,
+        {
+            "extract_requirements": "extract_requirements",
+            "answer_with_regulation": "answer_with_regulation",
+        },
+    )
     builder.add_conditional_edges(
         "extract_requirements",
         _route_after_extraction,
@@ -529,5 +672,6 @@ def build_graph(
     )
     builder.add_edge("interpret_result", END)
     builder.add_edge("handle_infeasible", END)
+    builder.add_edge("answer_with_regulation", END)
 
     return builder.compile(checkpointer=checkpointer)

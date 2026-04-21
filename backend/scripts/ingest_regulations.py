@@ -41,7 +41,12 @@ from pathlib import Path
 # El script se ejecuta desde el directorio backend/
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from cimiento.rag.ingestion import chunk_by_article, extract_text_from_pdf, ingest_pdf
+from cimiento.rag.ingestion import (
+    chunk_by_article,
+    chunk_from_gii_xml,
+    extract_text_from_pdf,
+    ingest_document,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -100,33 +105,39 @@ async def run(
     recreate: bool,
     dry_run: bool,
 ) -> None:
-    pdfs = sorted(data_dir.glob("*.pdf"))
-    if not pdfs:
+    docs = sorted(
+        p for p in data_dir.iterdir() if p.suffix.lower() in {".pdf", ".xml"}
+    )
+    if not docs:
         log.warning(
-            "No se encontraron archivos PDF en '%s'. "
+            "No se encontraron archivos PDF/XML en '%s'. "
             "Descarga los documentos normativos y colócalos en ese directorio. "
             "Consulta data/normativa/de/README.md para instrucciones.",
             data_dir,
         )
         return
 
-    log.info("PDFs encontrados: %s", [p.name for p in pdfs])
+    log.info("Documentos encontrados: %s", [p.name for p in docs])
 
     if dry_run:
         log.info("Modo dry-run: solo se procesa el chunking, sin escritura en Qdrant.")
         total_chunks = 0
-        for pdf_path in pdfs:
-            doc_id = _resolve_document_id(pdf_path)
-            log.info("Procesando '%s' como '%s'…", pdf_path.name, doc_id)
+        for doc_path in docs:
+            doc_id = _resolve_document_id(doc_path)
+            log.info("Procesando '%s' como '%s'…", doc_path.name, doc_id)
             try:
-                text, meta = extract_text_from_pdf(pdf_path)
-                chunks = chunk_by_article(text, document=doc_id)
-                log.info(
-                    "  → %d chunks generados (%d páginas, %d caracteres)",
-                    len(chunks),
-                    meta.get("pages", 0),
-                    len(text),
-                )
+                if doc_path.suffix.lower() == ".xml":
+                    chunks = chunk_from_gii_xml(doc_path, doc_id)
+                    log.info("  → %d chunks generados (XML GII)", len(chunks))
+                else:
+                    text, meta = extract_text_from_pdf(doc_path)
+                    chunks = chunk_by_article(text, document=doc_id)
+                    log.info(
+                        "  → %d chunks generados (%d páginas, %d caracteres)",
+                        len(chunks),
+                        meta.get("pages", 0),
+                        len(text),
+                    )
                 if chunks:
                     sample = chunks[0]
                     log.info(
@@ -137,7 +148,7 @@ async def run(
                     )
                 total_chunks += len(chunks)
             except Exception:
-                log.exception("Error procesando '%s'", pdf_path.name)
+                log.exception("Error procesando '%s'", doc_path.name)
         log.info("Dry-run completado: %d chunks totales.", total_chunks)
         return
 
@@ -151,26 +162,27 @@ async def run(
 
     try:
         total_indexed = 0
-        for i, pdf_path in enumerate(pdfs):
-            doc_id = _resolve_document_id(pdf_path)
-            log.info("[%d/%d] Indexando '%s' como '%s'…", i + 1, len(pdfs), pdf_path.name, doc_id)
+        for i, doc_path in enumerate(docs):
+            doc_id = _resolve_document_id(doc_path)
+            log.info("[%d/%d] Indexando '%s' como '%s'…", i + 1, len(docs), doc_path.name, doc_id)
             try:
-                n = await ingest_pdf(
-                    pdf_path=pdf_path,
+                n = await ingest_document(
+                    path=doc_path,
                     document_id=doc_id,
                     ollama_client=ollama_client,
                     qdrant_client=qdrant_client,
                     collection_name=collection_name,
-                    recreate_collection=(recreate and i == 0),  # recrear solo en el primer PDF
+                    recreate_collection=(recreate and i == 0),
                 )
                 total_indexed += n
                 log.info("  ✓ %d chunks indexados.", n)
             except Exception:
-                log.exception("Error indexando '%s'", pdf_path.name)
+                log.exception("Error indexando '%s'", doc_path.name)
 
         log.info(
             "Ingesta completada: %d chunks totales en colección '%s'.",
-            total_indexed, collection_name,
+            total_indexed,
+            collection_name,
         )
     finally:
         await ollama_client.aclose()

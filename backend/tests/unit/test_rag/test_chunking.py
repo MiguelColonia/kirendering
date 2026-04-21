@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from cimiento.rag.ingestion import _clean_pdf_text, chunk_by_article
 from cimiento.rag.schemas import RegulationChunk
 

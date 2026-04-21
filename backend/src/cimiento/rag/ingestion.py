@@ -301,67 +301,91 @@ def _make_chunk(
 
 
 # ---------------------------------------------------------------------------
-# Ingesta completa: PDF → Qdrant
+# Parser XML GII (Gesetze im Internet)
+# ---------------------------------------------------------------------------
+
+
+def chunk_from_gii_xml(xml_path: Path, document: str) -> list[RegulationChunk]:
+    """
+    Parsea un XML en formato GII (Gesetze im Internet) y genera chunks por artículo.
+
+    El formato GII estructura cada norma en un elemento <norm> con:
+    - <metadaten><enbez> → número de artículo (§ N, Anlage N)
+    - <metadaten><titel> → título del artículo
+    - <textdaten><text><Content><P> → párrafos del texto
+
+    Los elementos sin <enbez> (marcadores de parte/sección como "Erster Teil") y el
+    elemento "Inhaltsübersicht" (índice) se omiten: no contienen contenido normativo útil.
+    Las secciones con enbez pero sin texto también se omiten.
+    """
+    import xml.etree.ElementTree as ET
+
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    chunks: list[RegulationChunk] = []
+    current_section = "Allgemein"
+
+    for norm in root.findall("norm"):
+        enbez = (norm.findtext("metadaten/enbez") or "").strip()
+        titel = (norm.findtext("metadaten/titel") or "").strip()
+
+        if not enbez or enbez == "Inhaltsübersicht":
+            continue
+
+        content_elem = norm.find(".//Content")
+        text = _extract_gii_text(content_elem) if content_elem is not None else ""
+        if not text.strip():
+            continue
+
+        chunks.append(
+            RegulationChunk(
+                id=RegulationChunk.make_id(document, enbez),
+                document=document.upper(),
+                section=current_section,
+                article_number=enbez,
+                article_title=titel,
+                text=text,
+                metadata={},
+            )
+        )
+
+    log.info(
+        "XML '%s': %d chunks generados de documento '%s'.",
+        xml_path.name,
+        len(chunks),
+        document,
+    )
+    return chunks
+
+
+def _extract_gii_text(content_elem: Any) -> str:
+    """Extrae texto limpio de un elemento <Content> GII, uniendo párrafos <P> con saltos."""
+    import xml.etree.ElementTree as ET
+
+    paragraphs = content_elem.findall(".//P")
+    if paragraphs:
+        return "\n".join(
+            ET.tostring(p, encoding="unicode", method="text").strip() for p in paragraphs
+        )
+    return ET.tostring(content_elem, encoding="unicode", method="text").strip()
+
+
+# ---------------------------------------------------------------------------
+# Ingesta completa: PDF → Qdrant / XML → Qdrant
 # ---------------------------------------------------------------------------
 
 _EMBED_BATCH_SIZE = 32  # Chunks por batch de embedding para no saturar Ollama
 
 
-async def ingest_pdf(
-    pdf_path: Path,
-    document_id: str,
+async def _upsert_chunks(
+    chunks: list[RegulationChunk],
     ollama_client: Any,
     qdrant_client: Any,
     collection_name: str,
-    *,
-    recreate_collection: bool = False,
 ) -> int:
-    """
-    Ingesta un PDF normativo alemán en Qdrant.
-
-    Parámetros
-    ----------
-    pdf_path:
-        Ruta al PDF que se va a indexar.
-    document_id:
-        Identificador canónico del documento (p.ej. "GEG", "MBO", "LBO_Bayern").
-    ollama_client:
-        OllamaClient ya inicializado; se usa para generar embeddings con nomic-embed-text.
-    qdrant_client:
-        AsyncQdrantClient ya inicializado.
-    collection_name:
-        Nombre de la colección Qdrant en la que se almacenan los chunks.
-    recreate_collection:
-        Si True, elimina y recrea la colección antes de indexar. Útil para re-indexación limpia.
-
-    Devuelve
-    --------
-    Número de chunks indexados.
-    """
+    """Genera embeddings en batches y hace upsert en Qdrant. Devuelve el total indexado."""
     from qdrant_client.models import PointStruct
 
-    log.info("Iniciando ingesta de '%s' como documento '%s'", pdf_path.name, document_id)
-
-    # 1. Crear o verificar colección
-    await _ensure_collection(qdrant_client, collection_name, recreate=recreate_collection)
-
-    # 2. Extraer texto
-    text, pdf_meta = extract_text_from_pdf(pdf_path)
-    log.info(
-        "Texto extraído de '%s': %d páginas, %d caracteres",
-        pdf_path.name,
-        pdf_meta.get("pages", 0),
-        len(text),
-    )
-
-    # 3. Chunking por artículo
-    chunks = chunk_by_article(text, document=document_id)
-    if not chunks:
-        log.warning("No se generaron chunks para '%s'. Verifica el formato del PDF.", pdf_path.name)
-        return 0
-    log.info("Chunks generados: %d artículos de '%s'", len(chunks), document_id)
-
-    # 4. Embeddings en batches y upsert
     total_upserted = 0
     for batch_start in range(0, len(chunks), _EMBED_BATCH_SIZE):
         batch = chunks[batch_start : batch_start + _EMBED_BATCH_SIZE]
@@ -379,7 +403,8 @@ async def ingest_pdf(
                     "article_title": chunk.article_title,
                     "text": chunk.text,
                     **{
-                        k: v for k, v in chunk.metadata.items()
+                        k: v
+                        for k, v in chunk.metadata.items()
                         if isinstance(v, (str, int, float, bool))
                     },
                 },
@@ -395,11 +420,71 @@ async def ingest_pdf(
             len(points),
         )
 
+    return total_upserted
+
+
+async def ingest_document(
+    path: Path,
+    document_id: str,
+    ollama_client: Any,
+    qdrant_client: Any,
+    collection_name: str,
+    *,
+    recreate_collection: bool = False,
+) -> int:
+    """
+    Ingesta un documento normativo (PDF o XML GII) en Qdrant.
+
+    Enruta automáticamente a `ingest_pdf` para .pdf o `chunk_from_gii_xml` para .xml.
+    """
+    log.info("Iniciando ingesta de '%s' como documento '%s'", path.name, document_id)
+    await _ensure_collection(qdrant_client, collection_name, recreate=recreate_collection)
+
+    if path.suffix.lower() == ".xml":
+        chunks = chunk_from_gii_xml(path, document_id)
+    else:
+        text, pdf_meta = extract_text_from_pdf(path)
+        log.info(
+            "Texto extraído de '%s': %d páginas, %d caracteres",
+            path.name,
+            pdf_meta.get("pages", 0),
+            len(text),
+        )
+        chunks = chunk_by_article(text, document=document_id)
+
+    if not chunks:
+        log.warning("No se generaron chunks para '%s'. Verifica el formato del archivo.", path.name)
+        return 0
+
+    log.info("Chunks generados: %d artículos de '%s'", len(chunks), document_id)
+    total = await _upsert_chunks(chunks, ollama_client, qdrant_client, collection_name)
     log.info(
         "Ingesta completada: %d chunks de '%s' en colección '%s'",
-        total_upserted, document_id, collection_name,
+        total,
+        document_id,
+        collection_name,
     )
-    return total_upserted
+    return total
+
+
+async def ingest_pdf(
+    pdf_path: Path,
+    document_id: str,
+    ollama_client: Any,
+    qdrant_client: Any,
+    collection_name: str,
+    *,
+    recreate_collection: bool = False,
+) -> int:
+    """Ingesta un PDF normativo alemán en Qdrant. Alias de ingest_document para PDFs."""
+    return await ingest_document(
+        pdf_path,
+        document_id,
+        ollama_client,
+        qdrant_client,
+        collection_name,
+        recreate_collection=recreate_collection,
+    )
 
 
 async def _ensure_collection(

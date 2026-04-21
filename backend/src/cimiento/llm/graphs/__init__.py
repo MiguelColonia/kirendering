@@ -4,6 +4,7 @@ from cimiento.llm.graphs.design_assistant import (
     DesignAssistantState,
     ExtractedDesignParams,
     ValidationOutcome,
+    _is_regulation_query,
     build_graph,
 )
 
@@ -12,4 +13,5 @@ __all__ = [
     "DesignAssistantState",
     "ExtractedDesignParams",
     "ValidationOutcome",
+    "_is_regulation_query",
 ]
