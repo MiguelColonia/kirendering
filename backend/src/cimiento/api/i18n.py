@@ -5,8 +5,15 @@ from __future__ import annotations
 ERROR_MESSAGES_DE: dict[str, str] = {
     "PROJECT_NOT_FOUND": "Das Projekt wurde nicht gefunden.",
     "PROJECT_HAS_NO_VERSION": "Für dieses Projekt ist keine gespeicherte Version vorhanden.",
-    "JOB_NOT_FOUND": "Der Generierungsauftrag wurde nicht gefunden.",
+    "PROJECT_HAS_NO_IFC": "Für dieses Projekt liegt noch kein IFC-Modell vor. Erzeugen Sie zuerst einen Entwurf.",
+    "JOB_NOT_FOUND": "Der Auftrag wurde nicht gefunden.",
     "OUTPUT_NOT_FOUND": "Die angeforderte Datei wurde nicht gefunden.",
+    "RENDER_NOT_FOUND": "Der angeforderte Render wurde nicht gefunden.",
+    "RENDER_FAILED": "Der Render konnte nicht abgeschlossen werden.",
+    "RENDER_VIEW_NOT_AVAILABLE": "Die gewünschte Ansicht konnte nicht erzeugt werden.",
+    "UNSUPPORTED_REFERENCE_IMAGE": (
+        "Als Referenzbild werden nur PNG, JPG, JPEG oder WEBP unterstützt."
+    ),
     "UNSUPPORTED_OUTPUT_FORMAT": "Das angeforderte Ausgabeformat wird nicht unterstützt.",
     "INFEASIBLE_SOLUTION": (
         "Für die angegebenen Parameter konnte keine gültige Lösung berechnet werden."

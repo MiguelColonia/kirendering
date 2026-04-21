@@ -1,0 +1,141 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: cimiento-prod-postgres
+    env_file:
+      - .env.prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - cimiento_prod_postgres_data:/var/lib/postgresql/data
+    networks:
+      - cimiento_prod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: cimiento-prod-qdrant
+    env_file:
+      - .env.prod
+    volumes:
+      - cimiento_prod_qdrant_data:/qdrant/storage
+    networks:
+      - cimiento_prod
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:6333/collections || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: cimiento-prod-ollama
+    profiles: ["ollama"]
+    volumes:
+      - cimiento_prod_ollama_data:/root/.ollama
+    networks:
+      - cimiento_prod
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    # Para GPU AMD containerizada, descomente y adapte segun el host:
+    # devices:
+    #   - /dev/kfd
+    #   - /dev/dri
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+      target: runtime
+    container_name: cimiento-prod-backend
+    env_file:
+      - .env.prod
+    environment:
+      APP_NAME: ${APP_NAME}
+      DEBUG: ${DEBUG}
+      DATABASE_URL: ${DATABASE_URL}
+      QDRANT_HOST: ${QDRANT_HOST}
+      QDRANT_PORT: ${QDRANT_PORT}
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION}
+      OLLAMA_HOST: ${OLLAMA_HOST}
+      SOLVER_TIMEOUT_SECONDS: ${SOLVER_TIMEOUT_SECONDS}
+      BLENDER_EXECUTABLE: ${BLENDER_EXECUTABLE}
+      RENDER_SAMPLES: ${RENDER_SAMPLES}
+      RENDER_WIDTH: ${RENDER_WIDTH}
+      RENDER_HEIGHT: ${RENDER_HEIGHT}
+      RENDER_TIMEOUT_SECONDS: ${RENDER_TIMEOUT_SECONDS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    expose:
+      - "8000"
+    volumes:
+      - cimiento_prod_backend_output_data:/app/backend/data/outputs
+    networks:
+      - cimiento_prod
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: frontend/Dockerfile
+    container_name: cimiento-prod-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    networks:
+      - cimiento_prod
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+networks:
+  cimiento_prod:
+    driver: bridge
+
+volumes:
+  cimiento_prod_qdrant_data:
+    name: cimiento_prod_qdrant_data
+  cimiento_prod_postgres_data:
+    name: cimiento_prod_postgres_data
+  cimiento_prod_backend_output_data:
+    name: cimiento_prod_backend_output_data
+  cimiento_prod_ollama_data:
+    name: cimiento_prod_ollama_data

@@ -1,32 +1,44 @@
 #!/usr/bin/env bash
-# Setup inicial del proyecto
-set -e
+
+set -euo pipefail
 
 echo "=== Setup de Cimiento ==="
 
 # Backend
 echo "Instalando dependencias Python..."
-cd backend
+pushd backend >/dev/null
 if command -v uv &> /dev/null; then
     uv sync --all-extras
 else
-    echo "uv no encontrado. Instalando con pip..."
+    echo "uv no encontrado. Instalando entorno virtual con pip..."
     python3 -m venv .venv
     source .venv/bin/activate
     pip install -e ".[dev]"
 fi
-cd ..
+popd >/dev/null
+
+# Frontend
+echo "Instalando dependencias frontend..."
+pushd frontend >/dev/null
+npm install
+popd >/dev/null
 
 # Infra
 echo "Levantando servicios con Docker Compose..."
-cd infra/docker
+pushd infra/docker >/dev/null
 docker compose up -d
-cd ../..
+popd >/dev/null
 
 # Ollama
-echo "Descargando modelos LLM..."
-sleep 5
-./infra/ollama/pull-models.sh
+if command -v ollama &> /dev/null; then
+    echo "Descargando modelos Ollama del proyecto..."
+    ./infra/ollama/pull-models.sh
+else
+    echo "Ollama no está instalado; omitiendo descarga automática de modelos."
+fi
 
 echo "=== Setup completado ==="
-echo "Próximo paso: cd frontend && npm create vite@latest . -- --template react-ts"
+echo "Siguientes pasos sugeridos:"
+echo "  - cd backend && uv run pytest"
+echo "  - cd frontend && npm run build"
+echo "  - revisar docs/installation/README.md para ajustes por hardware"

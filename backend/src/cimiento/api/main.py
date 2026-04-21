@@ -22,6 +22,7 @@ from cimiento.api.routers.downloads import router as downloads_router
 from cimiento.api.routers.generation import router as generation_router
 from cimiento.api.routers.health import router as health_router
 from cimiento.api.routers.projects import router as projects_router
+from cimiento.api.routers.renders import router as renders_router
 from cimiento.core.config import settings
 from cimiento.llm.client import OllamaClient
 from cimiento.llm.graphs import build_graph
@@ -146,6 +147,7 @@ def create_app(
     app.include_router(projects_router)
     app.include_router(generation_router)
     app.include_router(downloads_router)
+    app.include_router(renders_router)
     app.include_router(health_router)
     app.include_router(chat_router)
     return app

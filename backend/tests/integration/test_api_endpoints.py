@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import base64
 import time
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
 from cimiento.api.main import create_app
+from cimiento.schemas.render import RenderResult, RenderView
 from cimiento.schemas import Program, Typology, TypologyMix
 
 pytest_plugins = ["tests.fixtures.valid_cases"]
@@ -130,6 +133,92 @@ def test_generation_job_websocket_and_downloads(
         response = client.get(f"/api/projects/{project_id}/outputs/{output_format}")
         assert response.status_code == 200
         assert response.content
+
+
+def test_render_job_gallery_and_download_by_id(
+    client: TestClient,
+    sample_solar_rectangular,
+    sample_typology_t2: Typology,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    project_id = _create_project(
+        client, _project_payload(sample_solar_rectangular, sample_typology_t2)
+    )
+
+    generation_response = client.post(f"/api/projects/{project_id}/generate")
+    assert generation_response.status_code == 202
+    generation_job_id = generation_response.json()["job_id"]
+    generation_payload = _wait_for_job(client, generation_job_id)
+    assert generation_payload["status"] == "finished"
+
+    def fake_run_render(config) -> RenderResult:
+        config.output_dir.mkdir(parents=True, exist_ok=True)
+
+        exterior_path = Path(config.output_dir) / "exterior_34.png"
+        interior_path = Path(config.output_dir) / "interior_0.png"
+        exterior_path.write_bytes(b"fake-render-exterior")
+        interior_path.write_bytes(b"fake-render-interior")
+
+        return RenderResult(
+            project_id=config.project_id,
+            output_dir=Path(config.output_dir),
+            views=[
+                RenderView(
+                    name="exterior_34",
+                    output_path=exterior_path,
+                    duration_seconds=8.4,
+                ),
+                RenderView(
+                    name="interior_0",
+                    output_path=interior_path,
+                    duration_seconds=9.1,
+                ),
+            ],
+            total_duration_seconds=17.5,
+            device_used="CPU",
+            blender_version="4.2.0",
+        )
+
+    monkeypatch.setattr("cimiento.api.routers.renders.run_render", fake_run_render)
+
+    start_response = client.post(
+        f"/api/projects/{project_id}/renders",
+        json={
+            "view": "exterior",
+            "prompt": "Strassenperspektive mit warmem Abendlicht",
+            "reference_image_name": "referenz.jpg",
+            "reference_image_media_type": "image/jpeg",
+            "reference_image_base64": base64.b64encode(b"fake-reference-image").decode("ascii"),
+        },
+    )
+    assert start_response.status_code == 202
+    render_job_id = start_response.json()["job_id"]
+
+    job_payload = _wait_for_job(client, render_job_id)
+    assert job_payload["status"] == "finished"
+    assert any(event["event"] == "render_started" for event in job_payload["events"])
+    assert any(event["event"] == "finished" for event in job_payload["events"])
+
+    list_response = client.get(f"/api/projects/{project_id}/renders")
+    assert list_response.status_code == 200
+    renders = list_response.json()
+    assert len(renders) == 1
+
+    render = renders[0]
+    assert render["view"] == "exterior"
+    assert render["prompt"] == "Strassenperspektive mit warmem Abendlicht"
+    assert render["has_reference_image"] is True
+    assert render["image_url"] == f"/api/renders/{render['id']}"
+    assert render["download_url"] == f"/api/renders/{render['id']}?download=1"
+
+    detail_response = client.get(f"/api/renders/{render['id']}")
+    assert detail_response.status_code == 200
+    assert detail_response.content == b"fake-render-exterior"
+
+    download_response = client.get(render["download_url"])
+    assert download_response.status_code == 200
+    assert download_response.content == b"fake-render-exterior"
+    assert "attachment" in download_response.headers["content-disposition"]
 
 
 def test_health_endpoint_reports_dependencies(client: TestClient) -> None:

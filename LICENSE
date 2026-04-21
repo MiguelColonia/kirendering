@@ -1,2 +1,20 @@
-Copyright (c) 2026 [Tu Nombre]
-All rights reserved.
+LICENSE PENDIENTE DE DECISION POR EL USUARIO
+
+El repositorio necesita una decision explicita sobre su licencia definitiva antes de una distribucion externa o comercial.
+
+Estado provisional:
+
+- Este archivo sustituye al placeholder inicial y deja constancia de que la licencia final no se ha decidido todavia.
+- Hasta que exista una decision formal del titular, no se concede una licencia abierta adicional mas alla de los derechos imperativos que resulten aplicables.
+
+Opciones recomendadas para decidir:
+
+1. Privado / comercial
+	Texto formal "All rights reserved" con nombre del titular, ano y referencia expresa a la jurisdiccion alemana aplicable.
+
+2. Codigo abierto con obligacion de reciprocidad en software con servidor
+	AGPL-3.0-or-later, adecuada si se quiere publicar el sistema manteniendo la obligacion de compartir modificaciones desplegadas en red.
+
+Accion pendiente:
+
+- Reemplazar este archivo por el texto legal definitivo en cuanto el usuario confirme la opcion elegida y, en su caso, el nombre exacto del titular.

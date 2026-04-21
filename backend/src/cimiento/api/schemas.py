@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Literal
 from datetime import datetime
 from typing import Any
 
@@ -26,6 +27,16 @@ class ProjectUpdateRequest(BaseModel):
     description: str | None = None
     solar: Solar
     program: Program
+
+
+class RenderCreateRequest(BaseModel):
+    """Payload para lanzar un render desde la API pública."""
+
+    view: Literal["exterior", "interior"]
+    prompt: str | None = None
+    reference_image_name: str | None = None
+    reference_image_base64: str | None = None
+    reference_image_media_type: str | None = None
 
 
 class GeneratedOutputResponse(BaseModel):
@@ -104,6 +115,26 @@ class JobStatusResponse(BaseModel):
     output_formats: list[str] = Field(default_factory=list)
     error: JobErrorResponse | None = None
     events: list[JobEventResponse] = Field(default_factory=list)
+
+
+class RenderGalleryItemResponse(BaseModel):
+    """Elemento serializado de la galería de renders de un proyecto."""
+
+    id: str
+    project_id: str
+    version_id: str
+    version_number: int
+    view: str
+    prompt: str | None = None
+    image_url: str
+    download_url: str
+    media_type: str | None = None
+    created_at: datetime
+    has_reference_image: bool = False
+    reference_image_name: str | None = None
+    duration_seconds: float | None = None
+    estimated_total_seconds: int | None = None
+    device_used: str | None = None
 
 
 class ServiceHealthResponse(BaseModel):

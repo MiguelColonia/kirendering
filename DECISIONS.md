@@ -40,6 +40,26 @@ Cuándo y bajo qué condiciones debería revisarse esta decisión.
 ## Registro de decisiones
 <!-- Las más recientes primero -->
 
+### ADR-0015 — Cierre v1.0: estado de decisiones acumuladas
+**Fecha:** 2026-04-21
+**Estado:** aceptada
+**Documento:** docs/decisions/0015-cierre-v1-0-estado-de-decisiones-acumuladas.md
+
+### ADR-0014 — Estrategia SD: diffusers vs ComfyUI, modelo y backend de inferencia
+**Fecha:** 2026-04-21
+**Estado:** aceptada
+**Documento:** docs/decisions/0014-diffusers-vs-comfyui-sd-pipeline.md
+
+### ADR-0013 — Modelo VLM local: qwen2.5vl:7b para interpretación de planos
+**Fecha:** 2026-04-21
+**Estado:** aceptada
+**Documento:** docs/decisions/0013-vlm-local-qwen25vl-para-vision.md
+
+### ADR-0012 — División OpenCV + VLM para ingesta visual de planos
+**Fecha:** 2026-04-21
+**Estado:** aceptada
+**Documento:** docs/decisions/0012-division-opencv-vlm-para-ingesta-visual.md
+
 ### ADR-0011 — Arquitectura RAG local y chunking por artículo para normativa alemana
 **Fecha:** 2026-04-21
 **Estado:** aceptada

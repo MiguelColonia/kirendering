@@ -110,6 +110,7 @@
     "save_error": "Projekt konnte nicht gespeichert werden.",
     "back_to_list": "Zur Projektliste",
     "description_fallback": "Noch keine Projektbeschreibung hinterlegt.",
+    "render_gallery": "Render öffnen",
     "version_label": "Version {{count}}",
     "meta": {
       "created_at": "Erstellt am",
@@ -285,6 +286,76 @@
       "description": "Passen Sie die Randbedingungen an und starten Sie die Generierung erneut.",
       "suggestion_reduce_units": "Wohneinheiten reduzieren",
       "suggestion_expand_site": "Grundstück vergrößern"
+    }
+  },
+  "renders": {
+    "eyebrow": "Render-Galerie",
+    "description": "Erzeugen Sie projektbezogene Außen- oder Innenansichten aus dem aktuellen IFC-Modell und laden Sie sie in hoher Qualität herunter.",
+    "back_to_project": "Zur Projektansicht",
+    "new_render": "Neuer Render",
+    "start_error": "Der Render konnte nicht gestartet werden.",
+    "connection_lost": "Die Live-Verbindung zum Renderauftrag wurde unterbrochen. Es wird automatisch erneut verbunden.",
+    "views": {
+      "exterior": "Außenansicht",
+      "interior": "Innenansicht"
+    },
+    "status": {
+      "idle": "Bereit",
+      "queued": "In Warteschlange",
+      "running": "Läuft",
+      "finished": "Abgeschlossen",
+      "failed": "Fehlgeschlagen"
+    },
+    "connection": {
+      "idle": "Nicht verbunden",
+      "connecting": "Verbindung wird aufgebaut…",
+      "connected": "Live-Verbindung aktiv",
+      "reconnecting": "Verbindung wird wiederhergestellt…",
+      "closed": "Stream abgeschlossen",
+      "error": "Verbindung gestört"
+    },
+    "form": {
+      "title": "Neuen Render konfigurieren",
+      "description": "Wählen Sie die gewünschte Ansicht, ergänzen Sie optional einen deutschen Stilhinweis und laden Sie bei Bedarf ein Referenzbild hoch.",
+      "ifc_ready": "IFC bereit",
+      "ifc_missing": "IFC fehlt",
+      "ifc_hint": "Erzeugen Sie zuerst einen Entwurf mit IFC-Ausgabe, bevor Sie einen Render starten.",
+      "collapsed_hint": "Der Render nutzt immer das aktuelle IFC-Modell der neuesten Projektversion. Optional können Sie mit Prompt und Referenzbild die gewünschte Stimmung dokumentieren.",
+      "fields": {
+        "view": "Ansicht",
+        "prompt": "Prompt auf Deutsch (optional)",
+        "reference": "Referenzbild (optional)"
+      },
+      "prompt_placeholder": "Zum Beispiel: warmes Abendlicht, ruhige Materialität, realistische Straßenperspektive",
+      "reference_placeholder": "Kein Referenzbild ausgewählt",
+      "reference_action": "Datei wählen",
+      "submit": "Render starten"
+    },
+    "progress": {
+      "title": "Fortschritt",
+      "description": "Der Renderauftrag läuft als Job im Hintergrund. Die Fortschrittsleiste verwendet die geschätzte Renderdauer des Backends.",
+      "remaining": "Verbleibend",
+      "estimated_total": "Geschätzt gesamt",
+      "started_at": "Gestartet",
+      "job": "Auftrag",
+      "idle_hint": "Noch kein aktiver Renderauftrag.",
+      "latest_events": "Letzte Ereignisse",
+      "no_events": "Noch keine Ereignisse vorhanden."
+    },
+    "events": {
+      "render_started": "Render gestartet",
+      "render_finished": "Render gespeichert",
+      "finished": "Auftrag abgeschlossen",
+      "failed": "Auftrag fehlgeschlagen"
+    },
+    "gallery": {
+      "title": "Generierte Renders",
+      "description": "Alle bisher erzeugten Renderbilder für dieses Projekt in chronologischer Reihenfolge.",
+      "empty": "Noch keine Renders vorhanden. Starten Sie den ersten Render über die Schaltfläche oben.",
+      "download": "HQ-Download",
+      "reference": "Referenzbild",
+      "device": "Gerät",
+      "duration": "Renderdauer"
     }
   },
   "ifc_viewer": {

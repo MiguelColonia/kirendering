@@ -72,13 +72,21 @@ export function ProjectEditorPage() {
             project.description || t("project_editor.description_fallback")
           }
           actions={
-            <Link
-              to="/projekte"
-              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-line)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--color-ink)]"
-            >
-              <ArrowLeft size={16} />
-              {t("project_editor.back_to_list")}
-            </Link>
+            <>
+              <Link
+                to={`/projekte/${project.id}/renders`}
+                className="inline-flex items-center gap-2 rounded-full bg-[color:var(--color-clay)] px-5 py-3 text-sm font-semibold text-white"
+              >
+                {t("project_editor.render_gallery")}
+              </Link>
+              <Link
+                to="/projekte"
+                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-line)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--color-ink)]"
+              >
+                <ArrowLeft size={16} />
+                {t("project_editor.back_to_list")}
+              </Link>
+            </>
           }
         />
       </section>

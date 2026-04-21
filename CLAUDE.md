@@ -2,7 +2,9 @@
 
 ## 1. Contexto del proyecto
 
-Cimiento es un copiloto local de anteproyecto residencial que combina razonamiento conversacional (Ollama + LangGraph), optimización espacial (OR-Tools) y generación BIM abierta (IfcOpenShell). Funciona íntegramente en local, sin dependencias de servicios en la nube. El objetivo es asistir al arquitecto en la fase de anteproyecto: distribución de espacios, cumplimiento normativo y generación de modelo IFC.
+Cimiento es un copiloto local de anteproyecto residencial orientado al mercado alemán. Combina razonamiento conversacional con Ollama + LangGraph, optimización espacial determinista con OR-Tools CP-SAT, generación BIM abierta con IfcOpenShell, consulta normativa con Qdrant y visualización fotorrealista a partir del IFC.
+
+El objetivo ya no es construir el producto base, sino mantener y evolucionar una **v1.0 funcional** sin romper sus contratos arquitectónicos.
 
 ## 2. Arquitectura en capas
 
@@ -12,67 +14,165 @@ El sistema se organiza en siete capas verticales, de menor a mayor abstracción:
 2. **Geometry** (`src/cimiento/geometry/`) — Operaciones geométricas puras (sin LLM).
 3. **BIM** (`src/cimiento/bim/`) — Generación y lectura de archivos IFC con IfcOpenShell.
 4. **RAG normativo** (`src/cimiento/rag/`) — Ingesta, chunking y recuperación de normativa indexada en Qdrant.
-5. **Visión** (`src/cimiento/vision/`) — Ingesta visual de planos: OpenCV para geometría, VLM (qwen2.5vl:7b) para semántica. El output siempre es `PlanInterpretation` con `review_required=True`; **nunca se alimenta directamente al solver sin confirmación del usuario**.
-6. **API** (`src/cimiento/api/`) — Endpoints FastAPI que exponen el sistema al exterior.
-7. **LLM / Agentes** (`src/cimiento/llm/`) — Razonamiento conversacional con LangGraph y Ollama.
+5. **Visión** (`src/cimiento/vision/`) — Ingesta visual de planos con OpenCV + VLM, siempre bajo revisión humana.
+6. **API / frontend** (`src/cimiento/api/` + `frontend/`) — FastAPI, WebSockets, React + TypeScript y visor IFC.
+7. **LLM / agentes** (`src/cimiento/llm/`) — Razonamiento conversacional y orquestación.
 
 Las capas superiores pueden invocar a las inferiores; nunca al revés.
 
 ## 3. Principios no negociables
 
-- **El LLM nunca resuelve geometría.** Cualquier cálculo espacial o de distribución debe ir a través del solver o de la capa de geometry. El LLM interpreta y comunica; no calcula.
-- **Las capas se comunican exclusivamente vía schemas Pydantic** definidos en `src/cimiento/schemas/`. Nada de dicts libres entre módulos.
-- **OR-Tools CP-SAT es el solver.** No proponer ni introducir solvers alternativos (PuLP, scipy.optimize, etc.) sin discusión y decisión explícita previa.
-- **IFC es el formato BIM canónico.** DXF y XLSX son formatos derivados de exportación; nunca son la fuente de verdad del modelo.
-- **El output de visión siempre requiere revisión humana.** `PlanInterpretation.draft_building` no puede usarse como entrada directa del solver. `review_required=True` es una invariante permanente, no una advertencia blanda. (ADR 0012)
+- **El LLM nunca resuelve geometría.** Todo cálculo espacial debe pasar por solver o geometry.
+- **Las capas se comunican exclusivamente vía schemas Pydantic** definidos en `src/cimiento/schemas/`.
+- **OR-Tools CP-SAT es el solver oficial del proyecto.**
+- **IFC4 es el formato BIM canónico.** DXF, XLSX, SVG y render son derivados.
+- **La salida de visión siempre requiere revisión humana** antes de alimentar al solver. Ver ADR 0012.
+- **El render nunca modifica el IFC**; genera salidas visuales derivadas del modelo ya validado.
+- **Los ADRs vigentes son contrato técnico.** Revisar primero `DECISIONS.md` y ADR 0015 antes de cambiar la arquitectura.
 
 ## 4. Convenciones de código
 
-- Python 3.11+. Tipado estricto: todas las funciones públicas tienen anotaciones de tipo completas. Modelos de datos con Pydantic v2.
-- Linter: Ruff con `line-length = 100`. El código debe pasar `ruff check` sin advertencias antes de cualquier commit.
-- **Docstrings en español; código en inglés.** Los nombres de variables, funciones, clases y módulos van en inglés. Los docstrings y comentarios explicativos van en español.
-- Tests con pytest. Un test por cada función pública, mínimo. Los tests unitarios viven en `tests/unit/`; los de integración en `tests/integration/`.
+- Python 3.11+ con tipado estricto y Pydantic v2.
+- Ruff como linter y formateador con `line-length = 100`.
+- **Docstrings en español; código en inglés.**
+- Tests con pytest. Los tests unitarios viven en `tests/unit/`; los de integración en `tests/integration/`.
+- No añadir dependencias sin justificar impacto técnico y operativo.
 
-## 5. Comandos frecuentes
+## 5. Idiomas de producto y documentación
 
-```
-# Ejecutar tests
+- **La UI y la salida orientada a usuario final se entregan en alemán.**
+- **El mercado objetivo es Alemania**, así que términos como `Grundstück`, `Geschoss`, `Wohnprogramm` o referencias normativas alemanas no deben traducirse de forma artificial en la experiencia de producto.
+- El código sigue en inglés.
+- La documentación interna puede estar en español.
+- La documentación de instalación y presentación al usuario se mantiene en español y alemán cuando sea útil para despliegue y adopción.
+
+## 6. Modelos locales de referencia
+
+- `qwen2.5:14b-instruct-q4_K_M` — razonamiento crítico.
+- `qwen2.5:7b-instruct-q4_K_M` — extracción rápida y tareas ligeras.
+- `qwen2.5-coder:7b-instruct-q4_K_M` — soporte de código.
+- `nomic-embed-text` — embeddings del RAG normativo.
+- `qwen2.5vl:7b` — interpretación visual de planos.
+
+Los modelos efectivos y sus roles quedan fijados por los ADRs 0008, 0009 y 0013.
+
+## 7. Hardware de referencia
+
+Configuración validada del desarrollador original:
+
+- CPU: AMD Ryzen 7 5700G.
+- GPU: AMD Radeon RX 6600, 8 GB VRAM.
+- RAM: 32 GB.
+- SO: Linux.
+
+Para render y aceleración AMD, la referencia operativa conocida usa `HSA_OVERRIDE_GFX_VERSION=10.3.0` con ROCm o fallback Vulkan según el host.
+
+## 8. Estado actual
+
+**v1.0 — en mantenimiento.**
+
+Capacidades ya operativas al cierre:
+
+- Fases 1 a 8 completadas.
+- Producto web usable de extremo a extremo.
+- Copiloto conversacional en alemán.
+- RAG normativo local.
+- Ingesta visual de planos bajo revisión humana.
+- Render de proyecto con galería y descarga HQ.
+
+Documentos de entrada para mantenimiento:
+
+1. `README.md`
+2. `docs/installation/README.md`
+3. `docs/architecture/README.md`
+4. `DECISIONS.md` y ADR 0015
+5. `docs/progress/fase-04.md` a `docs/progress/fase-08.md`
+
+## 9. Fases del proyecto
+
+- [x] **Fase 1**: Solver aislado.
+- [x] **Fase 2**: Geometría y exportación BIM.
+- [x] **Fase 3**: Complejidad real sobre solares y núcleos.
+- [x] **Fase 4**: Web básica con FastAPI + frontend + visor IFC.
+- [x] **Fase 5**: Copiloto conversacional con LangGraph y Ollama.
+- [x] **Fase 6**: RAG normativo local sobre Qdrant.
+- [x] **Fase 7**: Ingesta visual con OpenCV + VLM.
+- [x] **Fase 8**: Render fotorrealista y galería de renders.
+
+## 10. Mantenimiento
+
+### Reporte de bugs
+
+No hay tracker externo por ahora. El proceso interno es:
+
+1. Reproducir el problema en la menor superficie posible.
+2. Registrar versión, hardware, SO, pasos exactos, resultado esperado y resultado real.
+3. Adjuntar logs, prompt, archivo IFC o imagen de entrada si aplica.
+4. Convertir el bug en test reproducible o, si no es posible aún, en una nota interna ligada al siguiente cambio de mantenimiento.
+
+### Propuesta de nuevas features
+
+La regla es **ADR primero, implementación después** cuando la propuesta cambie arquitectura, dependencias, política técnica o contratos entre capas.
+
+Si la idea es solo una mejora local de UX o una ampliación pequeña sin impacto sistémico, no hace falta ADR, pero sí justificar el alcance y mantener el cambio acotado.
+
+### Política de dependencias
+
+- Revisión trimestral de dependencias backend y frontend.
+- Antes de saltar a una major version, evaluar compatibilidad, coste de migración y riesgo operativo.
+- Cualquier cambio de dependencia que altere contratos de arquitectura, pipeline de modelos o despliegue debe documentarse con ADR o, como mínimo, con una nota explícita en el cambio.
+
+### Política de tests
+
+Cobertura mínima aceptable por módulo:
+
+- `solver`, `geometry`, `bim`, `rag`, `vision`, `render`: **80 %** mínimo.
+- `api`, `llm`, `frontend`: **70 %** mínimo, complementado con tests de integración sobre flujos críticos.
+- Todo flujo crítico de producto debe conservar al menos una validación de integración o end-to-end reproducible.
+
+Si un cambio baja de esos umbrales, debe justificarse explícitamente y dejar plan de recuperación.
+
+### Cómo retomar el proyecto tras un parón
+
+Orden de lectura recomendado:
+
+1. `README.md`
+2. `docs/installation/README.md`
+3. `docs/architecture/README.md`
+4. `DECISIONS.md`
+5. `docs/decisions/0015-cierre-v1-0-estado-de-decisiones-acumuladas.md`
+6. `docs/progress/fase-04.md` a `docs/progress/fase-08.md`
+7. Este `CLAUDE.md`
+8. El módulo concreto que vaya a tocarse
+
+## 11. Comandos frecuentes
+
+```bash
+# Tests backend
 cd backend && pytest
 
-# Lint
-cd backend && ruff check .
+# Cobertura backend
+cd backend && pytest --cov=cimiento
 
-# Formato
+# Lint y formato backend
+cd backend && ruff check .
 cd backend && ruff format .
+
+# Build frontend
+cd frontend && npm run build
+
+# Infra de desarrollo
+cd infra/docker && docker compose up --build -d
+
+# Infra de produccion
+cd infra/docker && docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
 ```
 
-## 6. Estado actual
+## 12. Qué no romper en mantenimiento
 
-**Fase 7 completada. Siguiente foco: Fase 8 — render fotorrealista.**
-
-Las Fases 1 a 7 dejan un producto con copiloto conversacional, RAG normativo e ingesta visual de planos, todo operativo en local:
-- Fase 1: schemas Pydantic v2, solver CP-SAT con `AddNoOverlap2D`.
-- Fase 2: schemas arquitectónicos, builder `Solution→Building`, exportación IFC4/DXF/XLSX.
-- Fase 3: soporte operativo de solares poligonales, comunicación vertical y mejoras geométricas clave.
-- Fase 4: FastAPI + frontend React/TypeScript en alemán, generación con WebSocket, visor IFC y descargas.
-- Fase 5: LangGraph `StateGraph` de 5 nodos, OllamaClient async, UI de chat con streaming y panel lateral.
-- Fase 6: RAG local sobre Qdrant con `nomic-embed-text`, chunking por artículo (§), ingesta PDF/XML y nodo `answer_with_regulation` con citas `[DOC §N]`.
-- Fase 7: capa de visión (`src/cimiento/vision/`) con pipeline OpenCV + VLM (qwen2.5vl:7b): rectificación, detección de muros (HoughLinesP), lectura de etiquetas alemanas, clasificación funcional de estancias, estimación de escala y `PlanInterpretation` con `draft_building` opcional. 28 tests unitarios. (ADR 0012, ADR 0013)
-
-Los outputs de referencia siguen en `data/outputs/rectangular_simple.*` y la API genera outputs versionados en `backend/data/outputs/api/`.
-
-El grafo de agentes vive en `src/cimiento/llm/graphs/design_assistant.py`. Los endpoints de chat son `POST /api/projects/{id}/chat` y `WS /api/projects/{id}/chat/stream`. La UI de chat es `frontend/src/features/chat/ChatPanel.tsx`.
-
-La normativa indexable se gestiona desde `src/cimiento/rag/` y el script de ingesta está en `backend/scripts/ingest_regulations.py`. Cuando existe XML GII se prioriza frente a PDF; la unidad primaria de chunking es el artículo completo y solo se subdivide por `Absatz` si el tamaño lo exige.
-
-La capa de visión vive en `src/cimiento/vision/`. Su función pública principal es `combine_preprocessing_and_vlm(image_path, vlm_client)`, que devuelve un `PlanInterpretation`. La escala métrica se solicita al VLM; sin escala, `draft_building` es `None`. El modelo VLM esperado es `qwen2.5vl:7b` vía Ollama con rol `"vision"`.
-
-## 7. Qué NO hacer todavía
-
-- No implementar render fotorrealista. Eso es Fase 8.
-- No alimentar `PlanInterpretation.draft_building` directamente al solver sin confirmación explícita del usuario. Es una invariante, no un consejo.
-- No romper la separación de capas: el LLM puede orquestar, pero no resolver geometría.
-- No añadir dependencias backend sin justificación y aprobación explícita.
-- No sustituir el chunking por artículo del RAG por ventanas fijas sin un ADR explícito.
-- No cambiar el checkpointer de `MemorySaver` a una implementación persistente sin decidir antes el esquema de base de datos y la estrategia operativa.
-- No exponer la capa de visión en un endpoint API hasta diseñar el flujo de revisión humana del `draft_building` (confirmación + corrección + ingreso al solver).
+- No mover geometría al LLM.
+- No sustituir CP-SAT sin ADR.
+- No degradar IFC a formato secundario.
+- No eliminar la revisión humana obligatoria en visión.
+- No introducir rutas de render que rehagan el modelo fuera del IFC.
+- No abrir nuevas dependencias de infraestructura sin documentar su coste operativo.
