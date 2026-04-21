@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 import httpx
 from fastapi import APIRouter, Request
@@ -68,7 +69,9 @@ async def health(request: Request) -> HealthResponse:
         "qdrant": await _run_health_check(request, "qdrant", _check_qdrant),
     }
     services = {
-        name: ServiceHealthResponse.model_validate(service) for name, service in raw_services.items()
+        name: ServiceHealthResponse.model_validate(service)
+        for name, service in raw_services.items()
     }
-    overall_status = "ok" if all(service.status == "ok" for service in services.values()) else "degraded"
+    all_ok = all(service.status == "ok" for service in services.values())
+    overall_status = "ok" if all_ok else "degraded"
     return HealthResponse(status=overall_status, app=request.app.title, services=services)

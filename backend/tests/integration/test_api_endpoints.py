@@ -62,13 +62,17 @@ def _wait_for_job(client: TestClient, job_id: str, timeout_s: float = 10.0) -> d
     raise AssertionError(f"El job {job_id} no terminó dentro del timeout")
 
 
-def test_projects_crud_flow(client: TestClient, sample_solar_rectangular, sample_typology_t2: Typology) -> None:
+def test_projects_crud_flow(
+    client: TestClient, sample_solar_rectangular, sample_typology_t2: Typology
+) -> None:
     payload = _project_payload(sample_solar_rectangular, sample_typology_t2)
     project_id = _create_project(client, payload)
 
     list_response = client.get("/api/projects")
     assert list_response.status_code == 200
-    listed_project = next(project for project in list_response.json() if project["id"] == project_id)
+    listed_project = next(
+        project for project in list_response.json() if project["id"] == project_id
+    )
     assert listed_project["status"] == "draft"
 
     detail_response = client.get(f"/api/projects/{project_id}")
@@ -98,7 +102,9 @@ def test_generation_job_websocket_and_downloads(
     sample_solar_rectangular,
     sample_typology_t2: Typology,
 ) -> None:
-    project_id = _create_project(client, _project_payload(sample_solar_rectangular, sample_typology_t2))
+    project_id = _create_project(
+        client, _project_payload(sample_solar_rectangular, sample_typology_t2)
+    )
 
     start_response = client.post(f"/api/projects/{project_id}/generate")
     assert start_response.status_code == 202

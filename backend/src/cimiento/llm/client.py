@@ -21,6 +21,7 @@ ModelRole = Literal[
     "simple",
     "chat",
     "coder",
+    "vision",
 ]
 
 
@@ -155,6 +156,7 @@ class OllamaClient:
             "simple": self._settings.ollama_model_fast,
             "chat": self._settings.ollama_model_chat,
             "coder": self._settings.ollama_model_coder,
+            "vision": self._settings.ollama_model_vision,
         }
         try:
             return role_mapping[role]

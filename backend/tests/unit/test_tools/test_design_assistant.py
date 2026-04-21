@@ -26,7 +26,6 @@ from cimiento.core.config import Settings
 from cimiento.llm.client import OllamaClient
 from cimiento.llm.graphs.design_assistant import build_graph
 
-
 # ---------------------------------------------------------------------------
 # Infraestructura de mock HTTP (reutiliza patrón de test_ollama_client.py)
 # ---------------------------------------------------------------------------

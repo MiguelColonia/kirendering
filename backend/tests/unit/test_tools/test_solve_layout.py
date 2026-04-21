@@ -3,7 +3,16 @@
 import pytest
 
 from cimiento.llm.tools.solve_layout import SolveLayoutInput, SolveLayoutOutput, solve_layout
-from cimiento.schemas import Point2D, Polygon2D, Program, Room, RoomType, Solar, Typology, TypologyMix
+from cimiento.schemas import (
+    Point2D,
+    Polygon2D,
+    Program,
+    Room,
+    RoomType,
+    Solar,
+    Typology,
+    TypologyMix,
+)
 from cimiento.schemas.solution import SolutionStatus
 
 

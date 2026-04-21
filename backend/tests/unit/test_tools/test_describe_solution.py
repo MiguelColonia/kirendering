@@ -15,10 +15,16 @@ from cimiento.core.config import Settings
 from cimiento.llm.client import OllamaClient
 from cimiento.llm.tools.describe_solution import SolutionDescription, describe_solution
 from cimiento.schemas import (
-    Point2D, Polygon2D, Program, Room, RoomType, Solar, Typology, TypologyMix,
+    Point2D,
+    Polygon2D,
+    Program,
+    Room,
+    RoomType,
+    Solar,
+    Typology,
+    TypologyMix,
 )
 from cimiento.schemas.solution import Solution, SolutionMetrics, SolutionStatus
-
 
 # ---------------------------------------------------------------------------
 # Mock HTTP server (misma infraestructura que test_ollama_client.py)

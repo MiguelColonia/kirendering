@@ -8,7 +8,9 @@ ERROR_MESSAGES_DE: dict[str, str] = {
     "JOB_NOT_FOUND": "Der Generierungsauftrag wurde nicht gefunden.",
     "OUTPUT_NOT_FOUND": "Die angeforderte Datei wurde nicht gefunden.",
     "UNSUPPORTED_OUTPUT_FORMAT": "Das angeforderte Ausgabeformat wird nicht unterstützt.",
-    "INFEASIBLE_SOLUTION": "Für die angegebenen Parameter konnte keine gültige Lösung berechnet werden.",
+    "INFEASIBLE_SOLUTION": (
+        "Für die angegebenen Parameter konnte keine gültige Lösung berechnet werden."
+    ),
     "GENERATION_FAILED": "Die Generierung konnte nicht abgeschlossen werden.",
     "VALIDATION_ERROR": "Die Anfrage enthält ungültige Daten.",
     "DATABASE_UNAVAILABLE": "Die Datenbank ist derzeit nicht verfügbar.",

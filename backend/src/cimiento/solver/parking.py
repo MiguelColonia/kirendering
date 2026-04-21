@@ -203,7 +203,9 @@ def _solve_parking_internal(
             message="No se encontró una plantilla de aparcamiento conectada y válida.",
         )
 
-    standard_spaces = sum(1 for s in best_layout.storey.spaces if s.type == ParkingSpaceType.STANDARD)
+    standard_spaces = sum(
+        1 for s in best_layout.storey.spaces if s.type == ParkingSpaceType.STANDARD
+    )
     accessible_spaces = sum(
         1 for s in best_layout.storey.spaces if s.type == ParkingSpaceType.ACCESSIBLE
     )
@@ -611,10 +613,8 @@ def _build_ramp(
 ) -> tuple[Rectangle, RampAccess]:
     if side == "left":
         x_min = min_x
-        x_max = min_x + ramp_width_m
         x_center = x_min + ramp_width_m / 2.0
     else:
-        x_max = max_x
         x_min = max_x - ramp_width_m
         x_center = x_min + ramp_width_m / 2.0
 
@@ -641,7 +641,9 @@ def _build_ramp(
     return ramp, ramp_access
 
 
-def _spine_bounds(min_x: float, max_x: float, side: str, lane_width_m: float) -> tuple[float, float]:
+def _spine_bounds(
+    min_x: float, max_x: float, side: str, lane_width_m: float
+) -> tuple[float, float]:
     if side == "left":
         return min_x, min_x + lane_width_m
     return max_x - lane_width_m, max_x
@@ -684,4 +686,9 @@ def _rectangles_overlap(a: Rectangle, b: Rectangle) -> bool:
     b_right = b.x + b.width
     a_top = a.y + a.height
     b_top = b.y + b.height
-    return not (a_right <= b.x + _EPS or b_right <= a.x + _EPS or a_top <= b.y + _EPS or b_top <= a.y + _EPS)
+    return not (
+        a_right <= b.x + _EPS
+        or b_right <= a.x + _EPS
+        or a_top <= b.y + _EPS
+        or b_top <= a.y + _EPS
+    )

@@ -19,7 +19,6 @@ from cimiento.api.schemas import (
 from cimiento.persistence.models import GeneratedOutput, Project, ProjectVersion
 from cimiento.persistence.repository import ProjectRepository
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
@@ -77,7 +76,9 @@ def _serialize_project_detail(
     latest_version: ProjectVersion | None,
 ) -> ProjectDetailResponse:
     summary = _serialize_project_summary(project)
-    return ProjectDetailResponse(**summary.model_dump(), current_version=_serialize_version(latest_version))
+    return ProjectDetailResponse(
+        **summary.model_dump(), current_version=_serialize_version(latest_version)
+    )
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=ProjectDetailResponse)

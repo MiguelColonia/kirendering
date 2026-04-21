@@ -374,8 +374,12 @@ def _solve_internal(
         model.Add(core_x_end == core_x + core_w_cells)
         model.Add(core_y_end == core_y + core_h_cells)
 
-        core_x_intervals.append(model.NewIntervalVar(core_x, core_w_cells, core_x_end, f"core_ix_{c}"))
-        core_y_intervals.append(model.NewIntervalVar(core_y, core_h_cells, core_y_end, f"core_iy_{c}"))
+        core_x_intervals.append(
+            model.NewIntervalVar(core_x, core_w_cells, core_x_end, f"core_ix_{c}")
+        )
+        core_y_intervals.append(
+            model.NewIntervalVar(core_y, core_h_cells, core_y_end, f"core_iy_{c}")
+        )
         core_x_vars.append(core_x)
         core_y_vars.append(core_y)
         model.AddAllowedAssignments([core_x, core_y], core_valid_positions)

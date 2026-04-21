@@ -251,7 +251,9 @@ def test_validate_feasibility_errors_before_warnings(
     levels = [i.level for i in report.issues]
     # Una vez aparece un WARNING/INFO no puede seguir un ERROR
     last_error_idx = max((i for i, lv in enumerate(levels) if lv == IssueLevel.ERROR), default=-1)
-    first_warning_idx = next((i for i, lv in enumerate(levels) if lv != IssueLevel.ERROR), len(levels))
+    first_warning_idx = next(
+        (i for i, lv in enumerate(levels) if lv != IssueLevel.ERROR), len(levels)
+    )
     assert last_error_idx < first_warning_idx
 
 

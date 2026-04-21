@@ -8,11 +8,16 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, FastAPI, Request, WebSocket, WebSocketDisconnect, status
 
-from cimiento.api.dependencies import get_job_manager, get_output_root, get_repository
+from cimiento.api.dependencies import get_job_manager, get_repository
 from cimiento.api.errors import api_error, job_not_found, project_not_found
 from cimiento.api.i18n import translate_error
 from cimiento.api.jobs import JobManager
-from cimiento.api.schemas import JobErrorResponse, JobEventResponse, JobStartResponse, JobStatusResponse
+from cimiento.api.schemas import (
+    JobErrorResponse,
+    JobEventResponse,
+    JobStartResponse,
+    JobStatusResponse,
+)
 from cimiento.bim import export_to_dxf, export_to_ifc, export_to_xlsx
 from cimiento.geometry import build_building_from_solution
 from cimiento.persistence.repository import ProjectRepository

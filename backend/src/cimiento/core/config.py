@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     ollama_model_chat: str = "qwen2.5:7b-instruct-q4_K_M"
     ollama_model_coder: str = "qwen2.5-coder:7b-instruct-q4_K_M"
     ollama_model_embed: str = "nomic-embed-text"
+    ollama_model_vision: str = "qwen2.5vl:7b"
 
     # Qdrant
     qdrant_host: str = "localhost"

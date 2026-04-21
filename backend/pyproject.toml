@@ -18,6 +18,7 @@ dependencies = [
     "trimesh>=4.5.0",
     "openpyxl>=3.1.5",
     "numpy>=2.1.0",
+    "opencv-python-headless>=4.10.0",
     # LLM y agentes
     "langgraph>=0.2.45",
     "langchain-ollama>=0.2.0",
@@ -58,6 +59,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+ignore = ["B008"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

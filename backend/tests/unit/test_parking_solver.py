@@ -2,8 +2,6 @@
 
 from collections import deque
 
-import pytest
-
 from cimiento.schemas import Point2D, Polygon2D, Program, Solar, Typology, TypologyMix
 from cimiento.solver import solve, solve_parking
 
@@ -131,7 +129,12 @@ def test_all_parking_spaces_are_connected_to_ramp(sample_typology_t2: Typology) 
         assert space.lane_id in seen
 
     core_rects = [
-        (core.position.x, core.position.y, core.position.x + core.width_m, core.position.y + core.depth_m)
+        (
+            core.position.x,
+            core.position.y,
+            core.position.x + core.width_m,
+            core.position.y + core.depth_m,
+        )
         for core in residential.communication_cores
     ]
     for space in parking.storey.spaces:

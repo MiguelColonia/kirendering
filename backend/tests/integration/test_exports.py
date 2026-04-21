@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from cimiento.bim import export_to_dxf, export_to_ifc, export_to_xlsx, validate_ifc
+from cimiento.bim import export_to_dxf, export_to_xlsx
 from cimiento.geometry import build_building_from_solution
 from cimiento.schemas import Program, Solar, Typology, TypologyMix
 

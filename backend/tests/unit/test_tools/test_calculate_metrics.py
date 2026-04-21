@@ -5,7 +5,14 @@ import pytest
 from cimiento.geometry.builder import build_building_from_solution
 from cimiento.llm.tools.calculate_metrics import UrbanMetrics, calculate_metrics
 from cimiento.schemas import (
-    Point2D, Polygon2D, Program, Room, RoomType, Solar, Typology, TypologyMix,
+    Point2D,
+    Polygon2D,
+    Program,
+    Room,
+    RoomType,
+    Solar,
+    Typology,
+    TypologyMix,
 )
 from cimiento.solver.engine import solve
 

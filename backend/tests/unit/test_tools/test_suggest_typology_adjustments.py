@@ -1,12 +1,11 @@
 """Tests del tool suggest_typology_adjustments."""
 
-import pytest
 
 from cimiento.llm.tools.suggest_typology_adjustments import (
     AdjustmentResult,
     suggest_typology_adjustments,
 )
-from cimiento.schemas import Point2D, Polygon2D, Program, Room, RoomType, Solar, Typology, TypologyMix
+from cimiento.schemas import Program, Room, RoomType, Typology, TypologyMix
 from cimiento.schemas.solution import Solution, SolutionMetrics, SolutionStatus
 
 

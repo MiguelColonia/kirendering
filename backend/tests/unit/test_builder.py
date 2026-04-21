@@ -151,7 +151,7 @@ class TestBuilderBasic:
         slab = floor_slabs[0]
         solar_pts = sample_solar_rectangular.contour.points
         assert len(slab.contour.points) == len(solar_pts)
-        for sp, solp in zip(slab.contour.points, solar_pts):
+        for sp, solp in zip(slab.contour.points, solar_pts, strict=False):
             assert sp.x == pytest.approx(solp.x)
             assert sp.y == pytest.approx(solp.y)
 

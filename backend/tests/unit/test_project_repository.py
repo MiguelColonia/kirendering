@@ -110,8 +110,12 @@ async def test_versions_increment_and_can_be_updated(
     project = await repository.create_project(name="Proyecto v2")
     program = _sample_program(sample_typology_t2)
 
-    first = await repository.create_project_version(project.id, solar=sample_solar_rectangular, program=program)
-    second = await repository.create_project_version(project.id, solar=sample_solar_rectangular, program=program)
+    first = await repository.create_project_version(
+        project.id, solar=sample_solar_rectangular, program=program
+    )
+    second = await repository.create_project_version(
+        project.id, solar=sample_solar_rectangular, program=program
+    )
 
     updated_project = await repository.update_project(project.id, name="Proyecto v2 actualizado")
     updated_second = await repository.update_project_version(second.id, solution=_sample_solution())

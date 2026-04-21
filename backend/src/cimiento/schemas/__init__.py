@@ -28,8 +28,24 @@ from cimiento.schemas.solution import (
     UnitPlacement,
 )
 from cimiento.schemas.typology import Room, RoomType, Typology
+from cimiento.schemas.vision import (
+    DetectedLabel,
+    DetectedSymbol,
+    PixelBBox,
+    PlanInterpretation,
+    RoomRegion,
+    SymbolType,
+    WallSegmentPx,
+)
 
 __all__ = [
+    "DetectedLabel",
+    "DetectedSymbol",
+    "PixelBBox",
+    "PlanInterpretation",
+    "RoomRegion",
+    "SymbolType",
+    "WallSegmentPx",
     "Building",
     "CommunicationCore",
     "Opening",

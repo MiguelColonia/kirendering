@@ -57,7 +57,9 @@ class ProjectRepository:
 
     async def list_projects(self) -> list[Project]:
         async with self._session_factory() as session:
-            stmt = select(Project).options(selectinload(Project.versions)).order_by(Project.created_at)
+            stmt = (
+                select(Project).options(selectinload(Project.versions)).order_by(Project.created_at)
+            )
             result = await session.scalars(stmt)
             return list(result.all())
 

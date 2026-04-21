@@ -40,7 +40,9 @@ def create_app(
     health_checks: dict[str, HealthCheck] | None = None,
 ) -> FastAPI:
     db_url = database_url or settings.database_url
-    resolved_output_root = output_root or (Path(__file__).resolve().parents[3] / "data" / "outputs" / "api")
+    resolved_output_root = output_root or (
+        Path(__file__).resolve().parents[3] / "data" / "outputs" / "api"
+    )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -150,3 +152,7 @@ def create_app(
 
 
 app = create_app()
+# La función create_app se encarga de inicializar y configurar la aplicación FastAPI,
+# incluyendo la configuración de middlewares, routers, y recursos compartidos como
+# clientes de chat y bases de datos. Esta función devuelve una instancia de FastAPI
+# lista para ser utilizada.
