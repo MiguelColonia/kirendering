@@ -159,8 +159,8 @@ def run(yaml_path: Path, timeout: int) -> None:
         )
         t_parking = time.perf_counter() - t0
         print(
-            f"  Parking: {parking_solution.status} — {parking_solution.metrics.total_spaces} plazas "
-            f"en {t_parking:.3f}s"
+            f"  Parking: {parking_solution.status} — "
+            f"{parking_solution.metrics.total_spaces} plazas en {t_parking:.3f}s"
         )
     else:
         t_parking = 0.0
@@ -215,7 +215,8 @@ def run(yaml_path: Path, timeout: int) -> None:
             print(f"    ⚠  {w}")
 
     print(
-        f"\n  Tiempo total: {t_solver + t_parking + t_builder + sum(t for _, t in outputs.values()):.3f}s"
+        f"\n  Tiempo total: "
+        f"{t_solver + t_parking + t_builder + sum(t for _, t in outputs.values()):.3f}s"
     )
 
 
