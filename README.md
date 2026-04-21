@@ -32,14 +32,6 @@ En v1.0 el producto ya cubre el ciclo completo de trabajo: crear proyecto, defin
 
 Las capturas pendientes y su contenido previsto están descritas en [docs/images/.README.md](docs/images/.README.md).
 
-### Vídeo demo
-
-El vídeo de demostración final se alojará en `docs/demo/video.mp4` cuando el usuario lo grabe. El guion detallado y el proceso recomendado para capturarlo están en [docs/demo/guion-video-demo.md](docs/demo/guion-video-demo.md) y [docs/demo/README.md](docs/demo/README.md).
-
-Marcador para insertar el enlace definitivo:
-
-`[VIDEO_DEMO_AQUI]`
-
 ### Instalación
 
 Hardware mínimo orientativo:
@@ -106,14 +98,6 @@ In v1.0 deckt das Produkt bereits den vollstaendigen Arbeitsablauf ab: Projekt a
 ![Render-Galerie](docs/images/placeholder.png)
 
 Die noch fehlenden Screenshots und ihre geplanten Inhalte sind in [docs/images/.README.md](docs/images/.README.md) beschrieben.
-
-### Demo-Video
-
-Das finale Demo-Video wird spaeter unter `docs/demo/video.mp4` abgelegt, sobald es manuell aufgenommen wurde. Drehbuch und Aufnahmeprozess befinden sich in [docs/demo/guion-video-demo.md](docs/demo/guion-video-demo.md) und [docs/demo/README.md](docs/demo/README.md).
-
-Platzhalter fuer den spaeteren Link:
-
-`[VIDEO_DEMO_AQUI]`
 
 ### Installation
 
