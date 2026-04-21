@@ -40,6 +40,11 @@ Cuándo y bajo qué condiciones debería revisarse esta decisión.
 ## Registro de decisiones
 <!-- Las más recientes primero -->
 
+### ADR-0008 — Cliente Ollama y modelos por rol
+**Fecha:** 2026-04-20
+**Estado:** aceptada
+**Documento:** docs/decisions/0008-cliente-ollama-y-modelos-por-rol.md
+
 ### ADR-0007 — Stack frontend para Fase 4
 **Fecha:** 2026-04-20
 **Estado:** aceptada

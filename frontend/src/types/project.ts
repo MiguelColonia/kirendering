@@ -147,3 +147,30 @@ export type JobStartResponse = {
   status: string
   project_id: string
 }
+
+export type ChatMessage = {
+  role: 'user' | 'assistant'
+  content: string
+  feasible?: boolean
+  solution?: Record<string, unknown> | null
+}
+
+export type ChatNodeEvent = {
+  type: 'node_start' | 'node_end'
+  node: string
+  label?: string
+}
+
+export type ChatDoneEvent = {
+  type: 'done'
+  response: string
+  feasible: boolean
+  solution: Record<string, unknown> | null
+}
+
+export type ChatErrorEvent = {
+  type: 'error'
+  message: string
+}
+
+export type ChatStreamEvent = ChatNodeEvent | ChatDoneEvent | ChatErrorEvent

@@ -201,7 +201,6 @@ def test_solver_empty_program_returns_empty_solution(
 
     Espera Solution FEASIBLE con cero unidades colocadas.
     """
-    from cimiento.schemas import TypologyMix
 
     program = Program(
         project_id="test-empty",
@@ -311,3 +310,251 @@ def test_solver_respects_max_distance_to_core(
             for core in solution.communication_cores
         )
         assert best <= max_distance + 1e-6
+
+
+def test_all_placements_contained_in_solar_polygon(
+    sample_solar_rectangular: Solar,
+    sample_typology_t2: Typology,
+) -> None:
+    """
+    Cada bbox colocada debe quedar completamente dentro del polígono del solar.
+
+    Verifica con Shapely que el solver no produce coordenadas fuera del contorno,
+    más allá de la restricción de bbox que ya aplica el modelo CP-SAT.
+    """
+    from shapely.geometry import Polygon as ShapelyPolygon
+    from shapely.geometry import box as shapely_box
+
+    from cimiento.schemas import TypologyMix
+
+    program = Program(
+        project_id="test-spatial-containment",
+        num_floors=1,
+        floor_height_m=3.0,
+        typologies=[sample_typology_t2],
+        mix=[TypologyMix(typology_id="T2", count=4)],
+    )
+
+    solution = solve(sample_solar_rectangular, program)
+    assert solution.status in (SolutionStatus.OPTIMAL, SolutionStatus.FEASIBLE)
+
+    solar_poly = ShapelyPolygon(
+        [(p.x, p.y) for p in sample_solar_rectangular.contour.points]
+    )
+    for i, p in enumerate(solution.placements):
+        unit_box = shapely_box(
+            p.bbox.x, p.bbox.y,
+            p.bbox.x + p.bbox.width, p.bbox.y + p.bbox.height,
+        )
+        assert solar_poly.covers(unit_box), (
+            f"Unidad {i} en ({p.bbox.x:.2f},{p.bbox.y:.2f})–"
+            f"({p.bbox.x + p.bbox.width:.2f},{p.bbox.y + p.bbox.height:.2f}) "
+            "queda fuera del polígono del solar"
+        )
+
+
+def test_all_cores_contained_in_solar_polygon(
+    sample_solar_rectangular: Solar,
+    sample_typology_t2: Typology,
+) -> None:
+    """
+    La bbox de cada núcleo de comunicación debe quedar completamente dentro del solar.
+
+    El solver aplica AddAllowedAssignments para los núcleos igual que para las unidades;
+    este test verifica que las coordenadas finales son coherentes con ese confinamiento.
+    """
+    from shapely.geometry import Polygon as ShapelyPolygon
+    from shapely.geometry import box as shapely_box
+
+    from cimiento.schemas import TypologyMix
+
+    program = Program(
+        project_id="test-core-containment",
+        num_floors=2,
+        floor_height_m=3.0,
+        typologies=[sample_typology_t2],
+        mix=[TypologyMix(typology_id="T2", count=4)],
+    )
+
+    solution = solve(sample_solar_rectangular, program)
+    assert solution.status in (SolutionStatus.OPTIMAL, SolutionStatus.FEASIBLE)
+    assert solution.communication_cores, "Se esperaba al menos un núcleo"
+
+    solar_poly = ShapelyPolygon(
+        [(p.x, p.y) for p in sample_solar_rectangular.contour.points]
+    )
+    for i, core in enumerate(solution.communication_cores):
+        core_box = shapely_box(
+            core.position.x, core.position.y,
+            core.position.x + core.width_m, core.position.y + core.depth_m,
+        )
+        assert solar_poly.covers(core_box), (
+            f"Núcleo {i} en ({core.position.x:.2f},{core.position.y:.2f}) "
+            "queda fuera del polígono del solar"
+        )
+
+
+def test_units_on_different_floors_may_share_xy_position(
+    sample_typology_t2: Typology,
+) -> None:
+    """
+    El solver aplica NoOverlap2D por planta, no entre plantas.
+
+    Solar estrecho (8×11 m) que solo cabe 1 T2 por planta. Con 2 plantas y 2 unidades
+    debe ser FEASIBLE porque las unidades de distintas plantas pueden compartir XY.
+    Con 1 sola planta y 2 unidades, debe ser INFEASIBLE.
+    """
+    from cimiento.schemas import Point2D, Polygon2D, TypologyMix
+
+    # 12×11 m: cabe exactamente 1 T2 (7×10) + 1 núcleo (4×6) sin solapamiento,
+    # pero no caben 2 T2 en la misma planta (2×7=14 > 12 m de ancho).
+    narrow_solar = Solar(
+        id="solar-narrow-12x11",
+        contour=Polygon2D(points=[
+            Point2D(x=0.0, y=0.0),
+            Point2D(x=12.0, y=0.0),
+            Point2D(x=12.0, y=11.0),
+            Point2D(x=0.0, y=11.0),
+        ]),
+        north_angle_deg=0.0,
+        max_buildable_height_m=9.0,
+    )
+
+    program_2f = Program(
+        project_id="test-floor-xy-2f",
+        num_floors=2,
+        floor_height_m=3.0,
+        typologies=[sample_typology_t2],
+        mix=[TypologyMix(typology_id="T2", count=2)],
+    )
+    solution_2f = solve(narrow_solar, program_2f)
+    assert solution_2f.status in (SolutionStatus.OPTIMAL, SolutionStatus.FEASIBLE), (
+        "Con 2 plantas distintas debe ser FEASIBLE aunque las unidades compartan XY"
+    )
+    assert solution_2f.metrics.num_units_placed == 2
+
+    program_1f = Program(
+        project_id="test-floor-xy-1f",
+        num_floors=1,
+        floor_height_m=3.0,
+        typologies=[sample_typology_t2],
+        mix=[TypologyMix(typology_id="T2", count=2)],
+    )
+    solution_1f = solve(narrow_solar, program_1f)
+    assert solution_1f.status == SolutionStatus.INFEASIBLE, (
+        "Con 1 planta en solar estrecho, 2 T2 no caben → INFEASIBLE"
+    )
+
+
+def test_solver_mixed_typologies_all_placed(
+    sample_solar_rectangular: Solar,
+    sample_typology_t2: Typology,
+) -> None:
+    """
+    Mezcla T1 (45 m²) + T2 (70 m²): todas las unidades de ambas tipologías deben colocarse
+    y typology_fulfillment debe ser 1.0 para cada una.
+    """
+    from cimiento.schemas import Room, RoomType, TypologyMix
+
+    typology_t1 = Typology(
+        id="T1",
+        name="Vivienda un dormitorio",
+        min_useful_area=45.0,
+        max_useful_area=60.0,
+        num_bedrooms=1,
+        num_bathrooms=1,
+        rooms=[
+            Room(type=RoomType.LIVING, min_area=15.0, min_short_side=3.0),
+            Room(type=RoomType.KITCHEN, min_area=8.0, min_short_side=2.0),
+            Room(type=RoomType.BEDROOM, min_area=10.0, min_short_side=2.5),
+            Room(type=RoomType.BATHROOM, min_area=3.5, min_short_side=1.5),
+        ],
+    )
+
+    program = Program(
+        project_id="test-mixed-typologies",
+        num_floors=2,
+        floor_height_m=3.0,
+        typologies=[typology_t1, sample_typology_t2],
+        mix=[
+            TypologyMix(typology_id="T1", count=3),
+            TypologyMix(typology_id="T2", count=3),
+        ],
+    )
+
+    solution = solve(sample_solar_rectangular, program)
+
+    assert solution.status in (SolutionStatus.OPTIMAL, SolutionStatus.FEASIBLE)
+    assert solution.metrics.num_units_placed == 6
+
+    placed_t1 = sum(1 for p in solution.placements if p.typology_id == "T1")
+    placed_t2 = sum(1 for p in solution.placements if p.typology_id == "T2")
+    assert placed_t1 == 3, f"Se esperaban 3 T1, colocadas: {placed_t1}"
+    assert placed_t2 == 3, f"Se esperaban 3 T2, colocadas: {placed_t2}"
+
+    assert solution.metrics.typology_fulfillment["T1"] == pytest.approx(1.0)
+    assert solution.metrics.typology_fulfillment["T2"] == pytest.approx(1.0)
+
+    for i, a in enumerate(solution.placements):
+        for b in solution.placements[i + 1:]:
+            if a.floor == b.floor:
+                assert not _rectangles_overlap(a.bbox, b.bbox), (
+                    f"Solapamiento en planta {a.floor} entre unidades {i} y {i + 1}"
+                )
+
+
+def test_solver_l_shaped_solar_units_inside_polygon(
+    sample_typology_t2: Typology,
+) -> None:
+    """
+    Solar en L (20×30 con cuadrante [10–20]×[15–30] recortado):
+    ninguna unidad puede colocarse en el área inexistente.
+
+    Verifica con Shapely que cada placement queda dentro del polígono real,
+    no solo dentro de la bbox del solar.
+    """
+    from shapely.geometry import Polygon as ShapelyPolygon
+    from shapely.geometry import box as shapely_box
+
+    from cimiento.schemas import Point2D, Polygon2D, TypologyMix
+
+    l_solar = Solar(
+        id="solar-l-shape-20x30",
+        contour=Polygon2D(points=[
+            Point2D(x=0.0, y=0.0),
+            Point2D(x=20.0, y=0.0),
+            Point2D(x=20.0, y=15.0),
+            Point2D(x=10.0, y=15.0),
+            Point2D(x=10.0, y=30.0),
+            Point2D(x=0.0, y=30.0),
+        ]),
+        north_angle_deg=0.0,
+        max_buildable_height_m=9.0,
+    )
+
+    program = Program(
+        project_id="test-l-shape",
+        num_floors=1,
+        floor_height_m=3.0,
+        typologies=[sample_typology_t2],
+        mix=[TypologyMix(typology_id="T2", count=3)],
+    )
+
+    solution = solve(l_solar, program)
+
+    assert solution.status in (SolutionStatus.OPTIMAL, SolutionStatus.FEASIBLE)
+    assert solution.metrics.num_units_placed == 3
+
+    solar_poly = ShapelyPolygon(
+        [(p.x, p.y) for p in l_solar.contour.points]
+    )
+    for i, p in enumerate(solution.placements):
+        unit_box = shapely_box(
+            p.bbox.x, p.bbox.y,
+            p.bbox.x + p.bbox.width, p.bbox.y + p.bbox.height,
+        )
+        assert solar_poly.covers(unit_box), (
+            f"Unidad {i} en ({p.bbox.x:.2f},{p.bbox.y:.2f})–"
+            f"({p.bbox.x + p.bbox.width:.2f},{p.bbox.y + p.bbox.height:.2f}) "
+            "cae en el área recortada del solar en L"
+        )

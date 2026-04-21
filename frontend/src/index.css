@@ -10,6 +10,8 @@
   --color-accent-soft: rgba(24, 78, 99, 0.1);
   --color-teal: #225b55;
   --color-teal-soft: rgba(34, 91, 85, 0.1);
+  --color-clay: #b86a42;
+  --color-clay-soft: rgba(184, 106, 66, 0.1);
   --shadow-panel: 0 24px 70px rgba(28, 39, 49, 0.08);
   font-synthesis: none;
   text-rendering: optimizeLegibility;

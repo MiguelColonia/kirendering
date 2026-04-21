@@ -14,13 +14,17 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from cimiento.api.i18n import translate_error
 from cimiento.api.jobs import JobManager
+from cimiento.api.routers.chat import router as chat_router
 from cimiento.api.routers.downloads import router as downloads_router
 from cimiento.api.routers.generation import router as generation_router
 from cimiento.api.routers.health import router as health_router
 from cimiento.api.routers.projects import router as projects_router
 from cimiento.core.config import settings
+from cimiento.llm.client import OllamaClient
+from cimiento.llm.graphs import build_graph
 from cimiento.persistence.models import Base
 from cimiento.persistence.repository import create_engine_from_url
+from langgraph.checkpoint.memory import MemorySaver
 
 logger = logging.getLogger(__name__)
 
@@ -54,10 +58,19 @@ def create_app(
             async with engine.begin() as connection:
                 await connection.run_sync(Base.metadata.create_all)
 
+        chat_client = OllamaClient(settings=settings)
+        app.state.chat_client = chat_client
+        app.state.chat_graph = build_graph(
+            client=chat_client,
+            checkpointer=MemorySaver(),
+        )
+        logger.info("Grafo de chat inicializado")
+
         try:
             yield
         finally:
             logger.info("Cerrando recursos de la aplicación FastAPI")
+            await app.state.chat_client.aclose()
             await engine.dispose()
 
     app = FastAPI(
@@ -121,6 +134,7 @@ def create_app(
     app.include_router(generation_router)
     app.include_router(downloads_router)
     app.include_router(health_router)
+    app.include_router(chat_router)
     return app
 
 

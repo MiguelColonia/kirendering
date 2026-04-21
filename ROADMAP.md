@@ -7,7 +7,7 @@ y estado actual de desarrollo.
 
 ## Estado actual
 **Versión:** 0.1.0
-**Fase:** Cierre de Fase 4 completado. Siguiente hito: Fase 5 — Copiloto conversacional
+**Fase:** Fase 5 — infraestructura conversacional base en progreso
 **Última actualización:** 2026-04-20
 
 ---
@@ -69,13 +69,17 @@ en IFC, con trazabilidad técnica y control total de datos en entorno local.
 
 ---
 
-### 💡 Fase 5 — Copiloto conversacional [siguiente]
+### 🔄 Fase 5 — Copiloto conversacional [en progreso]
 **Objetivo:** Añadir interacción asistida para iterar propuestas rápidamente.
 **Criterio de éxito:** Flujo conversacional estable con tool-calling validado por schemas.
 **Fecha estimada:** por definir
+- [x] Cliente Ollama async base con `chat(...)` y wrapper HTTP desacoplado de FastAPI
+- [x] Selección de modelo por rol (`planner`, `validator`, `normative`, `chat`, `coder`) desde configuración centralizada
+- [x] Soporte inicial de `response_format=json_schema` con tests y smoke test real local
 - [ ] Grafo de agentes con LangGraph
-- [ ] Integración Ollama según tipo de tarea
+- [ ] Integración Ollama en agentes y grafos según tipo de tarea
 - [ ] Validación de entrada/salida de herramientas con Pydantic
+- [ ] Primer flujo conversacional sobre proyectos, versiones y generación
 
 ---
 

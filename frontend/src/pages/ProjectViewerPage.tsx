@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom'
 import { buildOutputUrl, generateProject } from '../api/projects'
 import { PageHeader } from '../components/PageHeader'
 import { StatusBadge } from '../components/StatusBadge'
+import { ChatPanel } from '../features/chat/ChatPanel'
 import { GenerationStatusPanel } from '../features/generation/GenerationStatusPanel'
 import { IfcViewerPanel } from '../features/ifc-viewer/IfcViewerPanel'
 import { useProjectDetailQuery } from '../features/projects/useProjectsQuery'
@@ -167,6 +168,8 @@ export function ProjectViewerPage() {
       </div>
 
       <IfcViewerPanel sourceUrl={ifcOutput ? buildOutputUrl(projectId, 'ifc') : undefined} />
+
+      <ChatPanel projectId={projectId} />
 
       <section className="panel-surface rounded-[2rem] p-6">
         <div className="flex items-center justify-between">

@@ -1,5 +1,12 @@
 import { apiClient, API_BASE_URL, API_WS_BASE_URL } from './http'
-import type { JobStartResponse, JobStatus, ProjectDetail, ProjectPayload, ProjectSummary } from '../types/project'
+import type {
+  ChatMessage,
+  JobStartResponse,
+  JobStatus,
+  ProjectDetail,
+  ProjectPayload,
+  ProjectSummary,
+} from '../types/project'
 
 export async function listProjects(): Promise<ProjectSummary[]> {
   const response = await apiClient.get<ProjectSummary[]>('/api/projects')
@@ -41,4 +48,8 @@ export function buildOutputUrl(projectId: string, outputFormat: 'ifc' | 'dxf' | 
 
 export function buildJobStreamUrl(jobId: string): string {
   return `${API_WS_BASE_URL}/api/jobs/${jobId}/stream`
+}
+
+export function buildChatStreamUrl(projectId: string): string {
+  return `${API_WS_BASE_URL}/api/projects/${projectId}/chat/stream`
 }

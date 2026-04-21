@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 620" font-family="'IBM Plex Sans',system-ui,sans-serif">
+  <defs>
+    <!-- fade-in animation helper -->
+    <style>
+      .msg { opacity: 0; }
+
+      /* Header appears immediately */
+      .header { animation: fadein 0.3s 0.2s forwards; opacity: 0; }
+
+      /* User message */
+      .msg-user  { animation: slidein-right 0.4s 0.8s forwards; opacity: 0; }
+
+      /* Node progress indicators */
+      .node-1 { animation: fadein 0.3s 1.6s forwards; opacity: 0; }
+      .node-1-done { animation: fadein 0.2s 3.0s forwards; opacity: 0; }
+      .node-2 { animation: fadein 0.3s 3.2s forwards; opacity: 0; }
+      .node-2-done { animation: fadein 0.2s 6.5s forwards; opacity: 0; }
+      .node-3 { animation: fadein 0.3s 6.7s forwards; opacity: 0; }
+      .node-3-done { animation: fadein 0.2s 9.5s forwards; opacity: 0; }
+      .node-4 { animation: fadein 0.3s 9.7s forwards; opacity: 0; }
+
+      /* Assistant response */
+      .msg-asst { animation: slidein-left 0.5s 12.5s forwards; opacity: 0; }
+      .badge { animation: fadein 0.3s 13.0s forwards; opacity: 0; }
+
+      /* Second turn */
+      .msg-user2 { animation: slidein-right 0.4s 14.5s forwards; opacity: 0; }
+      .node-2b { animation: fadein 0.3s 15.3s forwards; opacity: 0; }
+      .msg-clarify { animation: slidein-left 0.4s 17.0s forwards; opacity: 0; }
+
+      @keyframes fadein {
+        from { opacity: 0; transform: translateY(4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slidein-right {
+        from { opacity: 0; transform: translateX(20px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes slidein-left {
+        from { opacity: 0; transform: translateX(-20px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+
+      /* Bouncing dots */
+      .dot { animation: bounce 1.0s infinite; }
+      .dot2 { animation: bounce 1.0s 0.15s infinite; }
+      .dot3 { animation: bounce 1.0s 0.30s infinite; }
+      @keyframes bounce {
+        0%,100% { cy: 28; }
+        50%      { cy: 22; }
+      }
+    </style>
+  </defs>
+
+  <!-- Panel background -->
+  <rect width="520" height="620" rx="16" fill="#f8faf8" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+
+  <!-- Header bar -->
+  <g class="header">
+    <rect width="520" height="52" rx="16" fill="white" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+    <rect width="520" height="36" y="16" fill="white"/>
+    <!-- Chat icon -->
+    <rect x="18" y="14" width="22" height="22" rx="5" fill="#b86a42" opacity="0.15"/>
+    <text x="29" y="29" text-anchor="middle" font-size="13" fill="#b86a42">💬</text>
+    <text x="50" y="31" font-size="14" font-weight="600" fill="#18242d" letter-spacing="-0.3px">KI-Assistent</text>
+    <text x="494" y="31" text-anchor="middle" font-size="18" fill="#5f6d76">›</text>
+    <line x1="0" y1="52" x2="520" y2="52" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+  </g>
+
+  <!-- ── TURN 1 ── -->
+
+  <!-- User message bubble -->
+  <g class="msg-user">
+    <rect x="120" y="68" width="384" height="52" rx="14" rx-bottom-right="4" fill="#b86a42"/>
+    <text x="136" y="87" font-size="11" fill="rgba(255,255,255,0.75)">Sie</text>
+    <text x="136" y="103" font-size="12" fill="white">Grundstück 20×30 m, 10 Wohnungen</text>
+    <text x="136" y="117" font-size="12" fill="white">mit 2 Schlafzimmern planen.</text>
+  </g>
+
+  <!-- Node 1: extract -->
+  <g class="node-1">
+    <rect x="16" y="134" width="270" height="32" rx="10" fill="white" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+    <circle class="dot"  cx="32" cy="150" r="3" fill="#5f6d76"/>
+    <circle class="dot2" cx="44" cy="150" r="3" fill="#5f6d76"/>
+    <circle class="dot3" cx="56" cy="150" r="3" fill="#5f6d76"/>
+    <text x="68" y="154" font-size="11" fill="#5f6d76">Anforderungen werden analysiert…</text>
+  </g>
+  <g class="node-1-done">
+    <rect x="16" y="134" width="270" height="32" rx="10" fill="#f0fdf4" stroke="rgba(24,36,45,0.08)" stroke-width="1"/>
+    <text x="30" y="154" font-size="12">✓</text>
+    <text x="50" y="154" font-size="11" fill="#15803d">Anforderungen analysiert</text>
+  </g>
+
+  <!-- Node 2: validate -->
+  <g class="node-2">
+    <rect x="16" y="174" width="290" height="32" rx="10" fill="white" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+    <circle class="dot"  cx="32" cy="190" r="3" fill="#5f6d76"/>
+    <circle class="dot2" cx="44" cy="190" r="3" fill="#5f6d76"/>
+    <circle class="dot3" cx="56" cy="190" r="3" fill="#5f6d76"/>
+    <text x="68" y="194" font-size="11" fill="#5f6d76">Normvorschriften werden geprüft…</text>
+  </g>
+  <g class="node-2-done">
+    <rect x="16" y="174" width="290" height="32" rx="10" fill="#f0fdf4" stroke="rgba(24,36,45,0.08)" stroke-width="1"/>
+    <text x="30" y="194" font-size="12">✓</text>
+    <text x="50" y="194" font-size="11" fill="#15803d">Normvorschriften geprüft</text>
+  </g>
+
+  <!-- Node 3: solver -->
+  <g class="node-3">
+    <rect x="16" y="214" width="200" height="32" rx="10" fill="white" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+    <circle class="dot"  cx="32" cy="230" r="3" fill="#5f6d76"/>
+    <circle class="dot2" cx="44" cy="230" r="3" fill="#5f6d76"/>
+    <circle class="dot3" cx="56" cy="230" r="3" fill="#5f6d76"/>
+    <text x="68" y="234" font-size="11" fill="#5f6d76">Solver läuft…</text>
+  </g>
+  <g class="node-3-done">
+    <rect x="16" y="214" width="200" height="32" rx="10" fill="#f0fdf4" stroke="rgba(24,36,45,0.08)" stroke-width="1"/>
+    <text x="30" y="234" font-size="12">✓</text>
+    <text x="50" y="234" font-size="11" fill="#15803d">Optimierung abgeschlossen</text>
+  </g>
+
+  <!-- Node 4: interpret -->
+  <g class="node-4">
+    <rect x="16" y="254" width="240" height="32" rx="10" fill="white" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+    <circle class="dot"  cx="32" cy="270" r="3" fill="#5f6d76"/>
+    <circle class="dot2" cx="44" cy="270" r="3" fill="#5f6d76"/>
+    <circle class="dot3" cx="56" cy="270" r="3" fill="#5f6d76"/>
+    <text x="68" y="274" font-size="11" fill="#5f6d76">Antwort wird generiert…</text>
+  </g>
+
+  <!-- Assistant response -->
+  <g class="msg-asst">
+    <rect x="16" y="298" width="390" height="110" rx="14" fill="white" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+    <text x="32" y="317" font-size="11" fill="#5f6d76">KI-Assistent</text>
+    <text x="32" y="335" font-size="12" fill="#18242d">Der Entwurf wurde erfolgreich optimiert.</text>
+    <text x="32" y="353" font-size="12" fill="#18242d">Es konnten <tspan font-weight="700">9 von 10 Wohneinheiten</tspan> auf</text>
+    <text x="32" y="371" font-size="12" fill="#18242d">3 Geschossen platziert werden.</text>
+    <text x="32" y="389" font-size="12" fill="#18242d">Gesamtfläche: <tspan font-weight="700">630 m²</tspan> · Auslastung: <tspan font-weight="700">87 %</tspan></text>
+  </g>
+  <g class="badge">
+    <rect x="32" y="416" width="72" height="20" rx="10" fill="#dcfce7"/>
+    <text x="68" y="430" text-anchor="middle" font-size="10" font-weight="700" fill="#15803d">Machbar</text>
+  </g>
+
+  <!-- ── TURN 2 ── -->
+
+  <!-- Divider label -->
+  <text x="260" y="450" text-anchor="middle" font-size="10" fill="#5f6d76" class="msg-user2">— zweiter Gesprächsturm —</text>
+
+  <!-- User message 2 -->
+  <g class="msg-user2">
+    <rect x="220" y="458" width="284" height="38" rx="14" fill="#b86a42"/>
+    <text x="236" y="481" font-size="12" fill="white">Können wir auf 12 Einheiten erhöhen?</text>
+  </g>
+
+  <!-- Short thinking indicator -->
+  <g class="node-2b">
+    <rect x="16" y="508" width="240" height="32" rx="10" fill="white" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+    <circle class="dot"  cx="32" cy="524" r="3" fill="#5f6d76"/>
+    <circle class="dot2" cx="44" cy="524" r="3" fill="#5f6d76"/>
+    <circle class="dot3" cx="56" cy="524" r="3" fill="#5f6d76"/>
+    <text x="68" y="528" font-size="11" fill="#5f6d76">Solver läuft…</text>
+  </g>
+
+  <!-- Follow-up response -->
+  <g class="msg-clarify">
+    <rect x="16" y="548" width="390" height="50" rx="14" fill="white" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+    <text x="32" y="567" font-size="12" fill="#18242d">Mit 12 Einheiten ist das Grundstück</text>
+    <text x="32" y="585" font-size="12" fill="#18242d">überlastet. Option: 4. Geschoss hinzufügen.</text>
+  </g>
+
+  <!-- Input bar -->
+  <rect x="0" y="594" width="520" height="26" rx="0" ry="0" fill="white" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+  <rect x="0" y="608" width="520" height="12" fill="white"/>
+  <rect x="16" y="598" width="460" height="18" rx="9" fill="#f8faf8" stroke="rgba(24,36,45,0.11)" stroke-width="1"/>
+  <text x="26" y="611" font-size="10" fill="#5f6d76">Nachricht eingeben…</text>
+  <rect x="482" y="598" width="22" height="18" rx="9" fill="#b86a42"/>
+  <text x="493" y="611" text-anchor="middle" font-size="11" fill="white">›</text>
+</svg>

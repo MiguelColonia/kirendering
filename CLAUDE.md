@@ -45,25 +45,29 @@ cd backend && ruff format .
 
 ## 6. Estado actual
 
-**Fase 4 completada. Siguiente foco: Fase 5 — copiloto conversacional sobre una base web ya usable.**
+**Fase 5 completada. Siguiente foco: Fase 6 — RAG normativo sobre Qdrant.**
 
-Las Fases 1 a 4 dejan ya un producto operable en local:
+Las Fases 1 a 5 dejan un producto con copiloto conversacional operativo en local:
 - Fase 1: schemas Pydantic v2, solver CP-SAT con `AddNoOverlap2D`.
 - Fase 2: schemas arquitectónicos, builder `Solution→Building`, exportación IFC4/DXF/XLSX.
 - Fase 3: soporte operativo de solares poligonales, comunicación vertical y mejoras geométricas clave.
 - Fase 4: FastAPI + frontend React/TypeScript en alemán, generación con WebSocket, visor IFC y descargas.
+- Fase 5: LangGraph `StateGraph` de 5 nodos, OllamaClient async, UI de chat con streaming y panel lateral.
 
 Los outputs de referencia siguen en `data/outputs/rectangular_simple.*` y la API genera outputs versionados en `backend/data/outputs/api/`.
 
+El grafo de agentes vive en `src/cimiento/llm/graphs/design_assistant.py`. Los endpoints de chat son `POST /api/projects/{id}/chat` y `WS /api/projects/{id}/chat/stream`. La UI de chat es `frontend/src/features/chat/ChatPanel.tsx`.
+
 El siguiente trabajo debe concentrarse en:
-1. Orquestación conversacional con LangGraph y Ollama.
-2. Tool-calling validado con Pydantic hacia solver, builder y validadores.
-3. UX conversacional sobre el flujo ya existente de proyectos, versiones y generación.
+1. Sustituir el stub `query_regulation` por RAG real contra normativa indexada en Qdrant.
+2. Persistir el hilo de chat en PostgreSQL (`AsyncPostgresSaver`) para sobrevivir reinicios.
+3. Conectar el resultado del copiloto al flujo de persistencia (guardar versión desde el grafo).
 
 ## 7. Qué NO hacer todavía
 
-- No implementar RAG normativo todavía (`src/cimiento/rag/`). Eso es Fase 6.
+- No conectar el grafo directamente a la capa de persistencia todavía. Eso es Fase 6.
 - No implementar ingesta visual de planos (`src/cimiento/vision/`). Eso es Fase 7.
 - No implementar render fotorrealista. Eso es Fase 8.
 - No romper la separación de capas: el LLM puede orquestar, pero no resolver geometría.
 - No añadir dependencias backend sin justificación y aprobación explícita.
+- No cambiar el checkpointer de `MemorySaver` a una implementación persistente sin decidir el esquema de base de datos.
