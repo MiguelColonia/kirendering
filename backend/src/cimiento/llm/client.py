@@ -190,6 +190,27 @@ class OllamaClient:
         response.raise_for_status()
         return OllamaChatResponse.model_validate(response.json())
 
+    async def embed(self, texts: str | list[str]) -> list[list[float]]:
+        """
+        Genera embeddings con el modelo configurado para el rol embed (nomic-embed-text).
+
+        Parámetros
+        ----------
+        texts:
+            Texto único o lista de textos a codificar.
+
+        Devuelve
+        --------
+        Lista de vectores de embedding, uno por texto de entrada.
+        """
+        model = self._settings.ollama_model_embed
+        input_list = [texts] if isinstance(texts, str) else list(texts)
+        payload: dict[str, Any] = {"model": model, "input": input_list}
+        response = await self._get_client().post("/api/embed", json=payload)
+        response.raise_for_status()
+        data: dict[str, Any] = response.json()
+        return data["embeddings"]
+
     async def aclose(self) -> None:
         """Cierra el cliente HTTP subyacente si fue inicializado."""
         if self._client is not None:

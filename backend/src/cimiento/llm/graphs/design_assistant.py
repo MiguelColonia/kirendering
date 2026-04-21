@@ -193,21 +193,30 @@ Regeln:
 - Antworte NUR mit dem JSON, ohne Erklärungen."""
 
 _VALIDATE_SYSTEM = """\
-Du bist ein Normativprüfer für Wohngebäude in Spanien.
-Dir werden Entwurfsparameter und Auszüge aus der Bauordnung übergeben.
+Du bist ein Normativprüfer für Wohngebäude in Deutschland.
+Dir werden Entwurfsparameter und Auszüge aus dem deutschen Baurecht übergeben:
+GEG 2023 (Gebäudeenergiegesetz), MBO 2016 (Musterbauordnung) und die jeweiligen
+Landesbauordnungen (LBO).
+
 Antworte ausschließlich mit einem JSON-Objekt:
 
 {
-  "ok": <true wenn keine Fehler>,
+  "ok": <true wenn keine normativrechtlichen Fehler vorliegen>,
   "warnings": ["..."],
   "errors": ["..."],
-  "message_de": "<Zusammenfassung auf Deutsch>"
+  "message_de": "<Zusammenfassung der Prüfergebnisse auf Deutsch>"
 }
 
 Regeln:
-- Fehler (errors) blockieren den Entwurf. Warnungen (warnings) sind hinweise.
-- Prüfe: Geschosszahl vs. Maximalhöhe, Mindestflächen, fehlende Angaben.
-- Antworte NUR mit dem JSON."""
+- Fehler (errors) blockieren den Entwurf und müssen behoben werden.
+- Warnungen (warnings) sind Hinweise zur Optimierung, blockieren nicht.
+- Prüfe insbesondere:
+    • Geschossanzahl vs. Aufzugspflicht (MBO § 37: Pflicht ab 4. OG oder > 13 m)
+    • Lichte Mindesthöhe der Aufenthaltsräume (MBO § 2: ≥ 2,40 m)
+    • Mindestflächen der Wohnungen (WoFlV / II. BV)
+    • Barrierefreiheit (MBO § 50: bei > 2 Wohnungen mind. 1 Geschoss barrierefrei)
+    • GRZ und GFZ nach BauNVO
+- Antworte NUR mit dem JSON, ohne Erklärungen außerhalb des JSON."""
 
 
 # ---------------------------------------------------------------------------
@@ -218,6 +227,7 @@ Regeln:
 def build_graph(
     client: OllamaClient | None = None,
     checkpointer: Any | None = None,
+    qdrant_client: Any | None = None,
 ) -> Any:
     """
     Construye y compila el grafo del copiloto de anteproyecto.
@@ -290,18 +300,26 @@ def build_graph(
 
     async def validate_normative(state: DesignAssistantState) -> dict[str, Any]:
         """
-        Valida los parámetros extraídos contra la normativa urbanística.
+        Valida los parámetros extraídos contra el derecho alemán de edificación.
 
-        Obtiene datos normativos relevantes mediante query_regulation y los
-        pasa al modelo qwen2.5:14b (rol "normative") junto con los parámetros
-        para que evalúe el cumplimiento y devuelva un ValidationOutcome.
+        Fase 6: consulta normativa real vía RAG sobre Qdrant (GEG, MBO, LBO).
+        Si Qdrant no está disponible recae automáticamente en datos mock alemanes.
+        Los resultados se pasan al modelo qwen2.5:14b que evalúa el cumplimiento.
         """
         raw = state.get("extracted_params") or {}
         params = ExtractedDesignParams.model_validate(raw)
 
-        # Obtener normativa relevante (determinista, sin LLM)
-        reg_height = query_regulation("height")
-        reg_habitability = query_regulation("habitability")
+        # Consultas normativas en alemán para mayor precisión semántica en el índice
+        reg_height = await query_regulation(
+            "Gebäudehöhe Geschossanzahl Aufzugspflicht MBO",
+            ollama_client=client,
+            qdrant_client=qdrant_client,
+        )
+        reg_habitability = await query_regulation(
+            "Mindestfläche Wohnung Aufenthaltsraum Barrierefreiheit MBO WoFlV",
+            ollama_client=client,
+            qdrant_client=qdrant_client,
+        )
         reg_text = "\n".join(
             f"- [{r.code}] {r.description}: {r.value}"
             for r in reg_height.items + reg_habitability.items

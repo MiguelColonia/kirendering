@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     # Qdrant
     qdrant_host: str = "localhost"
     qdrant_port: int = 6333
+    qdrant_collection: str = "normativa"
 
     # Base de datos
     database_url: str = "postgresql+asyncpg://cimiento:cimiento@localhost:5432/cimiento"

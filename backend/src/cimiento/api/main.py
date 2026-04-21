@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from langgraph.checkpoint.memory import MemorySaver
+from qdrant_client import AsyncQdrantClient
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from cimiento.api.i18n import translate_error
@@ -24,7 +27,6 @@ from cimiento.llm.client import OllamaClient
 from cimiento.llm.graphs import build_graph
 from cimiento.persistence.models import Base
 from cimiento.persistence.repository import create_engine_from_url
-from langgraph.checkpoint.memory import MemorySaver
 
 logger = logging.getLogger(__name__)
 
@@ -60,17 +62,26 @@ def create_app(
 
         chat_client = OllamaClient(settings=settings)
         app.state.chat_client = chat_client
+
+        qdrant = AsyncQdrantClient(
+            host=settings.qdrant_host,
+            port=settings.qdrant_port,
+        )
+        app.state.qdrant_client = qdrant
+
         app.state.chat_graph = build_graph(
             client=chat_client,
             checkpointer=MemorySaver(),
+            qdrant_client=qdrant,
         )
-        logger.info("Grafo de chat inicializado")
+        logger.info("Grafo de chat y cliente Qdrant inicializados")
 
         try:
             yield
         finally:
             logger.info("Cerrando recursos de la aplicación FastAPI")
             await app.state.chat_client.aclose()
+            await app.state.qdrant_client.close()
             await engine.dispose()
 
     app = FastAPI(
