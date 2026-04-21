@@ -18,6 +18,7 @@ from cimiento.schemas.architectural import (
 )
 from cimiento.schemas.geometry_primitives import Point2D, Polygon2D, Rectangle
 from cimiento.schemas.program import Program, TypologyMix
+from cimiento.schemas.render import RenderConfig, RenderDevice, RenderResult, RenderView
 from cimiento.schemas.solar import Solar
 from cimiento.schemas.solution import (
     ParkingSolution,
@@ -39,6 +40,10 @@ from cimiento.schemas.vision import (
 )
 
 __all__ = [
+    "RenderConfig",
+    "RenderDevice",
+    "RenderResult",
+    "RenderView",
     "DetectedLabel",
     "DetectedSymbol",
     "PixelBBox",

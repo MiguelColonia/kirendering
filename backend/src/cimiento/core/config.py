@@ -29,5 +29,12 @@ class Settings(BaseSettings):
     # Solver
     solver_timeout_seconds: int = 60
 
+    # Render
+    blender_executable: str = "blender"
+    render_samples: int = 64
+    render_width: int = 2048
+    render_height: int = 1152
+    render_timeout_seconds: int = 600
+
 
 settings = Settings()
