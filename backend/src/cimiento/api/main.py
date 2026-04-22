@@ -18,11 +18,13 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from cimiento.api.i18n import translate_error
 from cimiento.api.jobs import JobManager
 from cimiento.api.routers.chat import router as chat_router
+from cimiento.api.routers.diffusion import router as diffusion_router
 from cimiento.api.routers.downloads import router as downloads_router
 from cimiento.api.routers.generation import router as generation_router
 from cimiento.api.routers.health import router as health_router
 from cimiento.api.routers.projects import router as projects_router
 from cimiento.api.routers.renders import router as renders_router
+from cimiento.api.routers.vision import router as vision_router
 from cimiento.core.config import settings
 from cimiento.llm.client import OllamaClient
 from cimiento.llm.graphs import build_graph
@@ -150,6 +152,8 @@ def create_app(
     app.include_router(renders_router)
     app.include_router(health_router)
     app.include_router(chat_router)
+    app.include_router(vision_router)
+    app.include_router(diffusion_router)
     return app
 
 

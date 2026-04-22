@@ -375,16 +375,20 @@ def build_graph(
         raw = state.get("extracted_params") or {}
         params = ExtractedDesignParams.model_validate(raw)
 
-        # Consultas normativas en alemán para mayor precisión semántica en el índice
-        reg_height = await query_regulation(
-            "Gebäudehöhe Geschossanzahl Aufzugspflicht MBO",
-            ollama_client=client,
-            qdrant_client=qdrant_client,
-        )
-        reg_habitability = await query_regulation(
-            "Mindestfläche Wohnung Aufenthaltsraum Barrierefreiheit MBO WoFlV",
-            ollama_client=client,
-            qdrant_client=qdrant_client,
+        # Consultas normativas en paralelo para reducir latencia
+        import asyncio as _asyncio
+
+        reg_height, reg_habitability = await _asyncio.gather(
+            query_regulation(
+                "Gebäudehöhe Geschossanzahl Aufzugspflicht MBO",
+                ollama_client=client,
+                qdrant_client=qdrant_client,
+            ),
+            query_regulation(
+                "Mindestfläche Wohnung Aufenthaltsraum Barrierefreiheit MBO WoFlV",
+                ollama_client=client,
+                qdrant_client=qdrant_client,
+            ),
         )
         reg_text = "\n".join(
             f"- [{r.code}] {r.description}: {r.value}"
@@ -407,15 +411,12 @@ def build_graph(
             {
                 "role": "user",
                 "content": (
-                    f"Normative Anforderungen:\n{reg_text}\n\n"
-                    f"Entwurfsparameter:\n{params_summary}"
+                    f"Normative Anforderungen:\n{reg_text}\n\nEntwurfsparameter:\n{params_summary}"
                 ),
             },
         ]
         try:
-            response = await client.chat(
-                messages=messages, role="normative", format="json"
-            )
+            response = await client.chat(messages=messages, role="normative", format="json")
             outcome = ValidationOutcome.model_validate_json(response.content)
         except (ValidationError, ValueError, Exception) as exc:
             log.warning("validate_normative: fallo al parsear salida del LLM: %s", exc)
@@ -611,8 +612,7 @@ def build_graph(
             {
                 "role": "user",
                 "content": (
-                    f"Kontext aus den Normdokumenten:\n\n{context}\n\n"
-                    f"---\n\nFrage: {query}"
+                    f"Kontext aus den Normdokumenten:\n\n{context}\n\n---\n\nFrage: {query}"
                 ),
             },
         ]

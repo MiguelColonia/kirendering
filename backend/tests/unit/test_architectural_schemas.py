@@ -42,9 +42,7 @@ def _pt(x: float, y: float) -> Point2D:
 
 def _rect_polygon(w: float, h: float) -> Polygon2D:
     """Rectángulo de w×h con esquina inferior izquierda en el origen."""
-    return Polygon2D(
-        points=[_pt(0.0, 0.0), _pt(w, 0.0), _pt(w, h), _pt(0.0, h)]
-    )
+    return Polygon2D(points=[_pt(0.0, 0.0), _pt(w, 0.0), _pt(w, h), _pt(0.0, h)])
 
 
 def _valid_wall(
@@ -290,9 +288,7 @@ class TestSpace:
         space = Space(
             id="SP_TRI",
             name="Triángulo",
-            contour=Polygon2D(
-                points=[_pt(0.0, 0.0), _pt(3.0, 0.0), _pt(0.0, 4.0)]
-            ),
+            contour=Polygon2D(points=[_pt(0.0, 0.0), _pt(3.0, 0.0), _pt(0.0, 4.0)]),
             floor_level=0,
             room_type=RoomType.CORRIDOR,
         )

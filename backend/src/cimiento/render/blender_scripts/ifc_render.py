@@ -29,16 +29,18 @@ from mathutils import Euler, Vector
 # Argumentos
 # ---------------------------------------------------------------------------
 
+
 def _parse_args() -> argparse.Namespace:
     idx = sys.argv.index("--") if "--" in sys.argv else len(sys.argv)
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, help="Ruta al JSON de configuración de escena")
-    return parser.parse_args(sys.argv[idx + 1:])
+    return parser.parse_args(sys.argv[idx + 1 :])
 
 
 # ---------------------------------------------------------------------------
 # Escena base
 # ---------------------------------------------------------------------------
+
 
 def clear_scene() -> None:
     """Elimina todos los objetos de la escena por defecto."""
@@ -57,6 +59,7 @@ def clear_scene() -> None:
 # ---------------------------------------------------------------------------
 # Importación del OBJ
 # ---------------------------------------------------------------------------
+
 
 def import_obj(obj_path: str) -> None:
     """Importa el OBJ con coordenadas Z-up (igual que IFC)."""
@@ -179,6 +182,7 @@ def apply_materials() -> None:
 # Iluminación: Sky Texture Nishita + luz solar
 # ---------------------------------------------------------------------------
 
+
 def setup_lighting(north_angle_deg: float) -> None:
     """
     Configura un cielo procedural Nishita con sol orientado según el norte.
@@ -200,7 +204,7 @@ def setup_lighting(north_angle_deg: float) -> None:
     bg = nt.nodes.new("ShaderNodeBackground")
     sky = nt.nodes.new("ShaderNodeTexSky")
     sky.sky_type = "NISHITA"
-    sky.sun_elevation = math.radians(42.0)   # ~sol de media mañana
+    sky.sun_elevation = math.radians(42.0)  # ~sol de media mañana
     sky.sun_rotation = math.radians(-north_angle_deg)
     sky.altitude = 100.0
     sky.air_density = 1.0
@@ -222,16 +226,20 @@ def setup_lighting(north_angle_deg: float) -> None:
     sun.data.angle = math.radians(0.5)  # disco solar real ≈ 0.5°
     # Orientación: elevación 42°, azimut según north_angle
     sun_azimuth_rad = math.radians(north_angle_deg + 180.0)
-    sun.rotation_euler = Euler((
-        math.radians(90.0 - 42.0),
-        0.0,
-        sun_azimuth_rad,
-    ), "XYZ")
+    sun.rotation_euler = Euler(
+        (
+            math.radians(90.0 - 42.0),
+            0.0,
+            sun_azimuth_rad,
+        ),
+        "XYZ",
+    )
 
 
 # ---------------------------------------------------------------------------
 # Cámaras
 # ---------------------------------------------------------------------------
+
 
 def _look_at(cam_obj: bpy.types.Object, target: tuple[float, float, float]) -> None:
     """Apunta la cámara hacia target (usando -Z como eje de visión, Y arriba)."""
@@ -269,6 +277,7 @@ def setup_cameras(cameras_data: list[dict]) -> list[bpy.types.Object]:
 # ---------------------------------------------------------------------------
 # Configuración de render Cycles
 # ---------------------------------------------------------------------------
+
 
 def detect_gpu(preferred: str) -> str:
     """
@@ -338,6 +347,7 @@ def setup_render_settings(cfg: dict, device_used: str) -> None:
 # Loop de render por cámara
 # ---------------------------------------------------------------------------
 
+
 def render_views(
     cam_objects: list[bpy.types.Object],
     output_dir: str,
@@ -365,6 +375,7 @@ def render_views(
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     args = _parse_args()

@@ -266,11 +266,7 @@ def _solve_internal(
     core_h_cells = max(1, round(core_depth_m / grid_resolution_m))
 
     # --- Detección rápida de inviabilidad geométrica (unidades > bbox) ---
-    oversized = [
-        (tid, w, h)
-        for tid, w, h, _ in units
-        if w > solar_w_cells or h > solar_h_cells
-    ]
+    oversized = [(tid, w, h) for tid, w, h, _ in units if w > solar_w_cells or h > solar_h_cells]
     if oversized:
         elapsed = time.perf_counter() - t_start
         return _infeasible_solution(
@@ -297,9 +293,14 @@ def _solve_internal(
     for _, w, h, _ in units:
         if (w, h) not in shape_to_valid:
             shape_to_valid[(w, h)] = _valid_placements_for_shape(
-                solar_poly, min_x, min_y,
-                solar_w_cells, solar_h_cells,
-                grid_resolution_m, w, h,
+                solar_poly,
+                min_x,
+                min_y,
+                solar_w_cells,
+                solar_h_cells,
+                grid_resolution_m,
+                w,
+                h,
             )
 
     core_valid_positions = _valid_placements_for_shape(
@@ -447,10 +448,7 @@ def _solve_internal(
             metrics=SolutionMetrics(
                 total_assigned_area=0.0,
                 num_units_placed=0,
-                typology_fulfillment={
-                    tid: 0.0
-                    for tid in {u[0] for u in units}
-                },
+                typology_fulfillment={tid: 0.0 for tid in {u[0] for u in units}},
             ),
             solver_time_seconds=elapsed,
             message=message,
@@ -497,8 +495,7 @@ def _solve_internal(
         )
 
     typology_fulfillment = {
-        tid: placed_by_type.get(tid, 0) / req
-        for tid, req in requested_by_type.items()
+        tid: placed_by_type.get(tid, 0) / req for tid, req in requested_by_type.items()
     }
 
     return Solution(

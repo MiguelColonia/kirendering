@@ -93,8 +93,7 @@ def validate_program_feasibility(solar: Solar, program: Program) -> FeasibilityR
     # --- Superficie útil total requerida ---
     typology_map = {t.id: t for t in program.typologies}
     required_area = sum(
-        typology_map[entry.typology_id].min_useful_area * entry.count
-        for entry in program.mix
+        typology_map[entry.typology_id].min_useful_area * entry.count for entry in program.mix
     )
 
     # --- Superficie edificable estimada ---
@@ -103,37 +102,43 @@ def validate_program_feasibility(solar: Solar, program: Program) -> FeasibilityR
     # --- Comprobación 1: altura máxima vs número de plantas ---
     max_floors_by_height = int(solar.max_buildable_height_m / program.floor_height_m)
     if program.num_floors > max_floors_by_height:
-        issues.append(FeasibilityIssue(
-            level=IssueLevel.ERROR,
-            code="HEIGHT_EXCEEDED",
-            message=(
-                f"El programa solicita {program.num_floors} plantas pero la altura máxima "
-                f"({solar.max_buildable_height_m} m) solo permite {max_floors_by_height} plantas "
-                f"con alturas de {program.floor_height_m} m."
-            ),
-        ))
+        issues.append(
+            FeasibilityIssue(
+                level=IssueLevel.ERROR,
+                code="HEIGHT_EXCEEDED",
+                message=(
+                    f"El programa solicita {program.num_floors} plantas pero la altura máxima "
+                    f"({solar.max_buildable_height_m} m) solo permite {max_floors_by_height} plantas "
+                    f"con alturas de {program.floor_height_m} m."
+                ),
+            )
+        )
 
     # --- Comprobación 2: programa requiere más superficie de la edificable ---
     if required_area > estimated_buildable:
-        issues.append(FeasibilityIssue(
-            level=IssueLevel.ERROR,
-            code="AREA_INFEASIBLE",
-            message=(
-                f"El programa requiere {required_area:.0f} m² útiles pero la superficie "
-                f"edificable estimada ({estimated_buildable:.0f} m²) es insuficiente. "
-                f"Considera reducir el número de unidades o aumentar las plantas."
-            ),
-        ))
+        issues.append(
+            FeasibilityIssue(
+                level=IssueLevel.ERROR,
+                code="AREA_INFEASIBLE",
+                message=(
+                    f"El programa requiere {required_area:.0f} m² útiles pero la superficie "
+                    f"edificable estimada ({estimated_buildable:.0f} m²) es insuficiente. "
+                    f"Considera reducir el número de unidades o aumentar las plantas."
+                ),
+            )
+        )
     elif required_area > estimated_buildable * 0.90:
-        issues.append(FeasibilityIssue(
-            level=IssueLevel.WARNING,
-            code="AREA_TIGHT",
-            message=(
-                f"El programa ocupa el {required_area / estimated_buildable * 100:.0f}% "
-                "de la superficie edificable estimada. El solver puede tardar más o "
-                "encontrar solución subóptima."
-            ),
-        ))
+        issues.append(
+            FeasibilityIssue(
+                level=IssueLevel.WARNING,
+                code="AREA_TIGHT",
+                message=(
+                    f"El programa ocupa el {required_area / estimated_buildable * 100:.0f}% "
+                    "de la superficie edificable estimada. El solver puede tardar más o "
+                    "encontrar solución subóptima."
+                ),
+            )
+        )
 
     # --- Comprobación 3: tipologías mayores que el solar ---
     min_x, min_y, max_x, max_y = solar.contour.bounding_box
@@ -145,38 +150,44 @@ def validate_program_feasibility(solar: Solar, program: Program) -> FeasibilityR
         unit_w = 7.0
         unit_h = typology.min_useful_area / unit_w
         if unit_w > solar_bbox_w or unit_h > solar_bbox_h:
-            issues.append(FeasibilityIssue(
-                level=IssueLevel.ERROR,
-                code="UNIT_TOO_LARGE",
-                message=(
-                    f"La tipología '{typology.id}' ({typology.min_useful_area} m²) "
-                    f"requiere una forma aproximada de {unit_w:.1f} m × {unit_h:.1f} m "
-                    f"que no cabe en el solar "
-                    f"({solar_bbox_w:.1f} m × {solar_bbox_h:.1f} m)."
-                ),
-            ))
+            issues.append(
+                FeasibilityIssue(
+                    level=IssueLevel.ERROR,
+                    code="UNIT_TOO_LARGE",
+                    message=(
+                        f"La tipología '{typology.id}' ({typology.min_useful_area} m²) "
+                        f"requiere una forma aproximada de {unit_w:.1f} m × {unit_h:.1f} m "
+                        f"que no cabe en el solar "
+                        f"({solar_bbox_w:.1f} m × {solar_bbox_h:.1f} m)."
+                    ),
+                )
+            )
 
     # --- Comprobación 4: programa vacío ---
     if not program.mix:
-        issues.append(FeasibilityIssue(
-            level=IssueLevel.INFO,
-            code="EMPTY_PROGRAM",
-            message=(
-                "El programa no contiene unidades en el mix. "
-                "El solver devolverá una solución vacía."
-            ),
-        ))
+        issues.append(
+            FeasibilityIssue(
+                level=IssueLevel.INFO,
+                code="EMPTY_PROGRAM",
+                message=(
+                    "El programa no contiene unidades en el mix. "
+                    "El solver devolverá una solución vacía."
+                ),
+            )
+        )
 
     # --- Comprobación 5: solar con área muy pequeña ---
     if solar_area < 200:
-        issues.append(FeasibilityIssue(
-            level=IssueLevel.WARNING,
-            code="SMALL_SOLAR",
-            message=(
-                f"El solar tiene {solar_area:.0f} m², lo que puede limitar "
-                "la capacidad de núcleos de comunicación y circulaciones."
-            ),
-        ))
+        issues.append(
+            FeasibilityIssue(
+                level=IssueLevel.WARNING,
+                code="SMALL_SOLAR",
+                message=(
+                    f"El solar tiene {solar_area:.0f} m², lo que puede limitar "
+                    "la capacidad de núcleos de comunicación y circulaciones."
+                ),
+            )
+        )
 
     has_errors = any(i.level == IssueLevel.ERROR for i in issues)
     # Ordenar: errores primero, luego warnings, luego info

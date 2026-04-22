@@ -29,9 +29,7 @@ from cimiento.schemas.typology import RoomType
 _HEADER_FONT = Font(bold=True)
 _HEADER_FILL = PatternFill(fill_type="solid", fgColor="D9E1F2")
 _THIN_SIDE = Side(style="thin")
-_THIN_BORDER = Border(
-    left=_THIN_SIDE, right=_THIN_SIDE, top=_THIN_SIDE, bottom=_THIN_SIDE
-)
+_THIN_BORDER = Border(left=_THIN_SIDE, right=_THIN_SIDE, top=_THIN_SIDE, bottom=_THIN_SIDE)
 _NUM_FORMAT = "#,##0.00"
 _INT_FORMAT = "#,##0"
 
@@ -74,9 +72,7 @@ def _sheet_summary(wb: Workbook, building: Building, program: Program) -> None:
     total_area = sum(s.net_area_m2 for s in spaces)
 
     # Mix tipológico
-    mix_str = ", ".join(
-        f"{m.count}×{m.typology_id}" for m in program.mix
-    ) if program.mix else "—"
+    mix_str = ", ".join(f"{m.count}×{m.typology_id}" for m in program.mix) if program.mix else "—"
 
     rows = [
         ("Proyecto", building.project_id),
@@ -106,8 +102,12 @@ def _sheet_summary(wb: Workbook, building: Building, program: Program) -> None:
 def _sheet_units(wb: Workbook, building: Building) -> None:
     ws = wb.create_sheet("Unidades")
     headers = [
-        "ID Espacio", "Tipología", "Planta", "Área neta (m²)",
-        "Área construida (m²)", "Ratio neta/construida",
+        "ID Espacio",
+        "Tipología",
+        "Planta",
+        "Área neta (m²)",
+        "Área construida (m²)",
+        "Ratio neta/construida",
     ]
     _write_header_row(ws, headers, row=1)
 
@@ -240,9 +240,7 @@ def _set_border(cell) -> None:
 def _autofit_columns(ws) -> None:
     for col in ws.columns:
         max_len = max((len(str(c.value)) if c.value else 0 for c in col), default=0)
-        ws.column_dimensions[get_column_letter(col[0].column)].width = max(
-            max_len + 2, 12
-        )
+        ws.column_dimensions[get_column_letter(col[0].column)].width = max(max_len + 2, 12)
 
 
 def _all_spaces(building: Building) -> list[Space]:

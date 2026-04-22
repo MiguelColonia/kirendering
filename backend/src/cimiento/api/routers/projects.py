@@ -12,6 +12,8 @@ from cimiento.api.schemas import (
     GeneratedOutputResponse,
     ProjectCreateRequest,
     ProjectDetailResponse,
+    ProjectPatchProgramRequest,
+    ProjectPatchSolarRequest,
     ProjectSummaryResponse,
     ProjectUpdateRequest,
     ProjectVersionResponse,
@@ -139,6 +141,58 @@ async def update_project(
         project_id,
         solar=payload.solar,
         program=program,
+    )
+    project = await repository.get_project(project_id)
+    assert project is not None
+    version = await repository.get_project_version(version.id)
+    return _serialize_project_detail(project, version)
+
+
+@router.patch("/{project_id}/program", response_model=ProjectDetailResponse)
+async def patch_program(
+    project_id: str,
+    payload: ProjectPatchProgramRequest,
+    repository: ProjectRepository = Depends(get_repository),
+) -> ProjectDetailResponse:
+    """Actualiza solo el programa, manteniendo el solar de la versión actual."""
+    logger.info("Actualizando programa del proyecto '%s'", project_id)
+    project = await repository.get_project(project_id)
+    if project is None:
+        raise project_not_found(project_id)
+    current_version = await repository.get_latest_project_version(project_id)
+    solar = current_version.get_solar_model() if current_version else None
+    if solar is None:
+        from cimiento.api.errors import api_error
+
+        raise api_error(status.HTTP_409_CONFLICT, "PROJECT_HAS_NO_VERSION", project_id=project_id)
+    program = payload.program.model_copy(update={"project_id": project_id})
+    version = await repository.create_project_version(project_id, solar=solar, program=program)
+    project = await repository.get_project(project_id)
+    assert project is not None
+    version = await repository.get_project_version(version.id)
+    return _serialize_project_detail(project, version)
+
+
+@router.patch("/{project_id}/solar", response_model=ProjectDetailResponse)
+async def patch_solar(
+    project_id: str,
+    payload: ProjectPatchSolarRequest,
+    repository: ProjectRepository = Depends(get_repository),
+) -> ProjectDetailResponse:
+    """Actualiza solo el solar, manteniendo el programa de la versión actual."""
+    logger.info("Actualizando solar del proyecto '%s'", project_id)
+    project = await repository.get_project(project_id)
+    if project is None:
+        raise project_not_found(project_id)
+    current_version = await repository.get_latest_project_version(project_id)
+    program = current_version.get_program_model() if current_version else None
+    if program is None:
+        from cimiento.api.errors import api_error
+
+        raise api_error(status.HTTP_409_CONFLICT, "PROJECT_HAS_NO_VERSION", project_id=project_id)
+    program = program.model_copy(update={"project_id": project_id})
+    version = await repository.create_project_version(
+        project_id, solar=payload.solar, program=program
     )
     project = await repository.get_project(project_id)
     assert project is not None

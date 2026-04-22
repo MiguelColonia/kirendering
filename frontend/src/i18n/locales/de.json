@@ -427,6 +427,95 @@
       "unknown": "Element"
     }
   },
+  "plan_analyzer": {
+    "eyebrow": "Grundrissanalyse",
+    "trigger": "Grundriss analysieren",
+    "title": "Grundriss visuell analysieren",
+    "description": "Laden Sie ein Foto oder einen Scan des Grundrisses hoch. Der Copilot erkennt automatisch Räume, Beschriftungen und Symbole mit Hilfe von OpenCV und dem lokalen VLM.",
+    "upload": {
+      "label": "Grundrissbild hochladen",
+      "hint": "PNG, JPG, JPEG, WEBP oder TIF",
+      "action": "Datei auswählen oder hier ablegen",
+      "submit": "Analyse starten",
+      "review_notice": "Das Ergebnis ist immer ein Entwurf. Alle erkannten Räume und Maße müssen vor der Weiterverwendung manuell geprüft werden.",
+      "timeout_notice": "Die Analyse kann bis zu 5 Minuten dauern, je nach verfügbarer GPU-Leistung. Bitte schließen Sie das Fenster nicht."
+    },
+    "analyzing": {
+      "title": "Analyse läuft…",
+      "description": "Das VLM-Modell wertet Linien, Symbole und Beschriftungen aus. Je nach Modell und Bildgröße kann das einige Minuten dauern."
+    },
+    "result": {
+      "draft_notice": "Entwurf — alle Angaben sind approximativ und müssen vor der Weiterverwendung manuell überprüft werden.",
+      "scale": "Maßstab",
+      "scale_unknown": "Nicht erkannt",
+      "scale_value": "{{value}} m/px",
+      "dimensions": "Bildgröße",
+      "walls_detected": "Wandsegmente",
+      "bim_draft": "BIM-Entwurf",
+      "rooms_title": "Erkannte Räume",
+      "labels_title": "Erkannte Beschriftungen",
+      "symbols_title": "Erkannte Symbole",
+      "warnings_title": "Hinweise",
+      "no_rooms": "Keine Räume erkannt.",
+      "no_labels": "Keine Beschriftungen erkannt.",
+      "no_symbols": "Keine Symbole erkannt.",
+      "confirm": "Verstanden — Dialog schließen"
+    },
+    "error": {
+      "title": "Analyse fehlgeschlagen",
+      "generic": "Die Analyse konnte nicht abgeschlossen werden. Prüfen Sie, ob Ollama läuft und das VLM-Modell verfügbar ist.",
+      "hardware_hint": "Dieser Fehler ist in der Regel auf begrenzte GPU- oder Arbeitsspeicherkapazität zurückzuführen — nicht auf einen Fehler in der Software. Versuchen Sie, andere speicherintensive Prozesse zu beenden, oder starten Sie Ollama neu.",
+      "retry": "Erneut versuchen"
+    }
+  },
+  "diffusion": {
+    "eyebrow": "KI-Bildgenerierung",
+    "trigger": "KI-Bild erstellen",
+    "title": "KI-Visualisierung generieren",
+    "description": "Laden Sie ein Bild hoch und wählen Sie einen Modus: ControlNet erhält die Struktur des Originals, InstructPix2Pix bearbeitet das Bild nach einer Textanweisung.",
+    "modes": {
+      "depth": {
+        "label": "ControlNet Tiefe",
+        "desc": "Erhält die Volumen des Eingabebilds anhand einer Tiefenschätzung."
+      },
+      "canny": {
+        "label": "ControlNet Kanten",
+        "desc": "Bewahrt Linien und Kanten per Canny-Kantenerkennung."
+      },
+      "pix2pix": {
+        "label": "InstructPix2Pix",
+        "desc": "Bearbeitet das Bild anhand einer Textanweisung (z. B. «Sichtbeton-Fassade»)."
+      }
+    },
+    "compose": {
+      "mode_label": "Modus",
+      "upload_action": "Datei auswählen oder hier ablegen",
+      "upload_hint": "PNG, JPG, JPEG, WEBP oder TIF",
+      "prompt_label": "Beschreibung / Anweisung",
+      "prompt_placeholder": "z. B. «Fotorealistisches Rendering mit Sichtbeton-Fassade und warmem Abendlicht»",
+      "negative_prompt_label": "Negativ-Prompt (optional)",
+      "negative_prompt_placeholder": "z. B. «unscharf, verzerrt, schlechte Qualität»",
+      "hardware_notice": "Die Generierung kann 1–5 Minuten dauern, je nach verfügbarer GPU-Leistung. Beim ersten Aufruf werden die Modelle (~4 GB) heruntergeladen.",
+      "submit": "Generierung starten"
+    },
+    "processing": {
+      "title": "Generierung läuft…",
+      "description": "Das Diffusionsmodell verarbeitet das Bild. Je nach GPU-Kapazität kann das einige Minuten dauern. Bitte schließen Sie das Fenster nicht."
+    },
+    "done": {
+      "title": "Generierung abgeschlossen",
+      "description": "Das Bild wurde erfolgreich generiert und steht in der Galerie zur Verfügung.",
+      "confirm": "Galerie öffnen"
+    },
+    "error": {
+      "title": "Generierung fehlgeschlagen",
+      "generic": "Die Generierung konnte nicht abgeschlossen werden.",
+      "hardware_hint": "Dieser Fehler ist in der Regel auf unzureichenden GPU-Speicher zurückzuführen — nicht auf einen Fehler in der Software. Stellen Sie sicher, dass ausreichend VRAM verfügbar ist (mindestens 4 GB) und keine anderen GPU-intensiven Prozesse laufen.",
+      "retry": "Erneut versuchen"
+    },
+    "gallery_empty": "Noch keine KI-Bilder generiert. Klicken Sie auf «KI-Bild erstellen» und laden Sie ein Bild hoch.",
+    "refine": "Weiter bearbeiten"
+  },
   "viewer": {
     "title": "Projektansicht",
     "summary": "Projektübersicht",

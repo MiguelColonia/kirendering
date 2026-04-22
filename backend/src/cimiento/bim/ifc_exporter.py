@@ -126,18 +126,19 @@ def export_to_ifc(building: Building, output_path: Path) -> None:
             _export_slab(model, ifc_storey, slab, body_ctx)
 
         for space in storey.spaces:
-            _export_space(model, ifc_storey, space, storey.elevation_m,
-                          storey.height_m, body_ctx)
+            _export_space(model, ifc_storey, space, storey.elevation_m, storey.height_m, body_ctx)
 
         for opening in storey.openings:
             host_wall = wall_ifc_map.get(opening.host_wall_id)
-            wall_schema = next(
-                (w for w in storey.walls if w.id == opening.host_wall_id), None
-            )
+            wall_schema = next((w for w in storey.walls if w.id == opening.host_wall_id), None)
             if host_wall and wall_schema:
                 _export_opening(
-                    model, ifc_storey, opening, wall_schema,
-                    storey.elevation_m, body_ctx,
+                    model,
+                    ifc_storey,
+                    opening,
+                    wall_schema,
+                    storey.elevation_m,
+                    body_ctx,
                 )
 
         for idx, core in enumerate(building.communication_cores):
@@ -222,14 +223,10 @@ def _create_ifc_project(building: Building) -> ifcopenshell.file:
         "root.create_entity", model, ifc_class="IfcProject", name=building.name
     )
     # Unidades métricas SI: metros para longitud, metros cuadrados para área
-    ifcopenshell.api.run(
-        "unit.assign_unit", model, length={"is_metric": True, "raw": "METRES"}
-    )
+    ifcopenshell.api.run("unit.assign_unit", model, length={"is_metric": True, "raw": "METRES"})
 
     # Contexto de representación geométrica 3D
-    model_ctx = ifcopenshell.api.run(
-        "context.add_context", model, context_type="Model"
-    )
+    model_ctx = ifcopenshell.api.run("context.add_context", model, context_type="Model")
     ifcopenshell.api.run(
         "context.add_context",
         model,
@@ -241,12 +238,8 @@ def _create_ifc_project(building: Building) -> ifcopenshell.file:
 
     # IfcSite con georreferenciación básica (sin coordenadas reales; TODO Fase 4: integrar
     # referencia catastral y sistema de coordenadas del proyecto)
-    site = ifcopenshell.api.run(
-        "root.create_entity", model, ifc_class="IfcSite", name="Solar"
-    )
-    ifcopenshell.api.run(
-        "aggregate.assign_object", model, relating_object=project, products=[site]
-    )
+    site = ifcopenshell.api.run("root.create_entity", model, ifc_class="IfcSite", name="Solar")
+    ifcopenshell.api.run("aggregate.assign_object", model, relating_object=project, products=[site])
 
     ifc_building = ifcopenshell.api.run(
         "root.create_entity",
@@ -290,9 +283,7 @@ def _export_storey(
     # Cota de referencia de la planta
     matrix = np.eye(4)
     matrix[2][3] = storey.elevation_m
-    ifcopenshell.api.run(
-        "geometry.edit_object_placement", model, product=ifc_storey, matrix=matrix
-    )
+    ifcopenshell.api.run("geometry.edit_object_placement", model, product=ifc_storey, matrix=matrix)
     ifcopenshell.api.run(
         "aggregate.assign_object",
         model,
@@ -382,9 +373,7 @@ def _export_slab(
     # Placement en la cota correcta de la cara superior del forjado
     matrix = np.eye(4)
     matrix[2][3] = slab.elevation_m
-    ifcopenshell.api.run(
-        "geometry.edit_object_placement", model, product=ifc_slab, matrix=matrix
-    )
+    ifcopenshell.api.run("geometry.edit_object_placement", model, product=ifc_slab, matrix=matrix)
 
     ifcopenshell.api.run(
         "spatial.assign_container",
@@ -429,9 +418,7 @@ def _export_space(
 
     matrix = np.eye(4)
     matrix[2][3] = elevation_m
-    ifcopenshell.api.run(
-        "geometry.edit_object_placement", model, product=ifc_space, matrix=matrix
-    )
+    ifcopenshell.api.run("geometry.edit_object_placement", model, product=ifc_space, matrix=matrix)
 
     # IfcSpace es un IfcSpatialElement: se relaciona con el Storey mediante IfcRelAggregates,
     # no IfcRelContainedInSpatialStructure (que es para IfcElement físicos como muros y forjados).
@@ -490,16 +477,17 @@ def _export_opening(
     # Perpendicular a la izquierda del muro (apunta fuera de la habitación por convención)
     perp_x, perp_y = -uy, ux
 
-    matrix = np.array([
-        [ux,     perp_x, 0.0, ox],
-        [uy,     perp_y, 0.0, oy],
-        [0.0,    0.0,    1.0, cz],
-        [0.0,    0.0,    0.0, 1.0],
-    ], dtype=float)
-
-    ifcopenshell.api.run(
-        "geometry.edit_object_placement", model, product=element, matrix=matrix
+    matrix = np.array(
+        [
+            [ux, perp_x, 0.0, ox],
+            [uy, perp_y, 0.0, oy],
+            [0.0, 0.0, 1.0, cz],
+            [0.0, 0.0, 0.0, 1.0],
+        ],
+        dtype=float,
     )
+
+    ifcopenshell.api.run("geometry.edit_object_placement", model, product=element, matrix=matrix)
 
     # Geometría del hueco usando la API de puerta o ventana
     if is_door:

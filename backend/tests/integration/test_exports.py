@@ -91,7 +91,10 @@ class TestXlsxExport:
         export_to_xlsx(building, program, path)
         wb = load_workbook(str(path))
         assert set(wb.sheetnames) == {
-            "Resumen", "Unidades", "Superficies por tipo", "Parámetros urbanísticos"
+            "Resumen",
+            "Unidades",
+            "Superficies por tipo",
+            "Parámetros urbanísticos",
         }
 
     def test_xlsx_units_sheet_has_five_rows(self, shared_building, tmp_path: Path) -> None:

@@ -26,8 +26,19 @@ Este directorio reúne las guías de instalación de Cimiento para nuevo hardwar
 2. Instalar drivers y aceleración antes de tocar Ollama o Docker.
 3. Instalar `uv`, dependencias Python y frontend.
 4. Descargar los modelos locales.
-5. Verificar backend, frontend y render base.
-6. Elegir después si el despliegue será desarrollo o producción.
+5. Si el host usa GPU AMD para Ollama, aplicar `sudo bash scripts/setup_ollama_gpu.sh`.
+6. Verificar backend, frontend, visión y render/difusión base.
+7. Elegir después si el despliegue será desarrollo o producción.
+
+### Verificación rápida de Ollama con GPU
+
+Después del override del servicio, comprobar que Ollama expone VRAM en uso:
+
+1. `ollama run qwen2.5:7b-instruct-q4_K_M "Hallo"`
+2. `curl -s http://localhost:11434/api/ps | python3 -m json.tool`
+3. Confirmar que `size_vram` sea mayor que `0`.
+
+Para un diagnóstico más completo existe la suite `backend/tests/integration/test_hardware_benchmark.py`, que valida hardware, modelos locales y latencias de referencia.
 
 ## Deutsch
 
@@ -55,5 +66,16 @@ Dieses Verzeichnis enthaelt die Installationsanleitungen fuer Cimiento auf neuer
 2. Treiber und Beschleunigung zuerst installieren, danach erst Ollama oder Docker.
 3. `uv`, Python-Abhaengigkeiten und Frontend installieren.
 4. Lokale Modelle herunterladen.
-5. Backend, Frontend und den Basis-Render pruefen.
-6. Erst danach zwischen Entwicklungs- und Produktionsbetrieb unterscheiden.
+5. Bei AMD-GPU fuer Ollama `sudo bash scripts/setup_ollama_gpu.sh` anwenden.
+6. Backend, Frontend, Vision sowie den Basis-Render/die Diffusion pruefen.
+7. Erst danach zwischen Entwicklungs- und Produktionsbetrieb unterscheiden.
+
+### Schnelle GPU-Pruefung fuer Ollama
+
+Nach dem Service-Override pruefen, ob Ollama tatsaechlich VRAM verwendet:
+
+1. `ollama run qwen2.5:7b-instruct-q4_K_M "Hallo"`
+2. `curl -s http://localhost:11434/api/ps | python3 -m json.tool`
+3. Sicherstellen, dass `size_vram` groesser als `0` ist.
+
+Fuer eine vollstaendigere Diagnose gibt es die Suite `backend/tests/integration/test_hardware_benchmark.py`; sie prueft Hardware, lokale Modelle und Referenzlatenzen.

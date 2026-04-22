@@ -77,8 +77,7 @@ def _build_filter(filters: dict[str, str]) -> Any:
     from qdrant_client.models import FieldCondition, Filter, MatchValue
 
     conditions = [
-        FieldCondition(key=key, match=MatchValue(value=value))
-        for key, value in filters.items()
+        FieldCondition(key=key, match=MatchValue(value=value)) for key, value in filters.items()
     ]
     return Filter(must=conditions)
 
@@ -98,9 +97,7 @@ def _scored_point_to_result(point: Any) -> RegulationSearchResult:
     return RegulationSearchResult(chunk=chunk, score=float(point.score))
 
 
-_KNOWN_PAYLOAD_KEYS = frozenset(
-    {"document", "section", "article_number", "article_title", "text"}
-)
+_KNOWN_PAYLOAD_KEYS = frozenset({"document", "section", "article_number", "article_title", "text"})
 
 
 def format_chunks_for_llm(results: list[RegulationSearchResult]) -> str:

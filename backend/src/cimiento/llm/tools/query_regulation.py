@@ -245,9 +245,7 @@ async def _rag_query(
             filters=filters,
         )
     except Exception:
-        log.exception(
-            "Error en búsqueda vectorial para consulta '%s'. Recayendo en mock.", query
-        )
+        log.exception("Error en búsqueda vectorial para consulta '%s'. Recayendo en mock.", query)
         return _mock_query(query)
 
     items = [

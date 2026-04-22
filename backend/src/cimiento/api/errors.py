@@ -31,3 +31,7 @@ def output_not_found(project_id: str, output_format: str) -> HTTPException:
 
 def render_not_found(render_id: str) -> HTTPException:
     return api_error(status.HTTP_404_NOT_FOUND, "RENDER_NOT_FOUND", render_id=render_id)
+
+
+def diffusion_not_found(diffusion_id: str) -> HTTPException:
+    return api_error(status.HTTP_404_NOT_FOUND, "DIFFUSION_NOT_FOUND", diffusion_id=diffusion_id)

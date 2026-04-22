@@ -37,15 +37,15 @@ _LAYER_WINDOWS = "VENTANAS"
 _LAYER_DIMS = "COTAS"
 _LAYER_TEXT = "TEXTOS"
 
-_COLOR_EXT = colors.RED        # 1
-_COLOR_INT = colors.GREEN      # 3
-_COLOR_DOORS = colors.CYAN     # 4
-_COLOR_WINDOWS = colors.BLUE   # 5
-_COLOR_DIMS = colors.WHITE     # 7
-_COLOR_TEXT = colors.YELLOW    # 2
+_COLOR_EXT = colors.RED  # 1
+_COLOR_INT = colors.GREEN  # 3
+_COLOR_DOORS = colors.CYAN  # 4
+_COLOR_WINDOWS = colors.BLUE  # 5
+_COLOR_DIMS = colors.WHITE  # 7
+_COLOR_TEXT = colors.YELLOW  # 2
 
-_DOOR_ARC_RADIUS_FACTOR = 0.9   # radio del arco = anchura de la puerta
-_TEXT_HEIGHT = 0.25              # altura de texto en metros
+_DOOR_ARC_RADIUS_FACTOR = 0.9  # radio del arco = anchura de la puerta
+_TEXT_HEIGHT = 0.25  # altura de texto en metros
 
 
 # ---------------------------------------------------------------------------
@@ -122,9 +122,7 @@ def _draw_openings(block, storey: Storey) -> None:
     Para ventanas, se dibujan dos líneas paralelas separadas 0.1 m (símbolo DIN).
     """
     for opening in storey.openings:
-        host_wall = next(
-            (w for w in storey.walls if w.id == opening.host_wall_id), None
-        )
+        host_wall = next((w for w in storey.walls if w.id == opening.host_wall_id), None)
         if host_wall is None:
             continue
 
@@ -132,6 +130,7 @@ def _draw_openings(block, storey: Storey) -> None:
         dx = host_wall.end_point.x - host_wall.start_point.x
         dy = host_wall.end_point.y - host_wall.start_point.y
         import math
+
         wall_len = math.hypot(dx, dy)
         if wall_len < 1e-9:
             continue

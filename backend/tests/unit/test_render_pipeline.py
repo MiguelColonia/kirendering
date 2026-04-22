@@ -188,9 +188,7 @@ class TestComputeCameras:
         ext_0 = cam_0[0]["position"][:2]
         ext_90 = cam_90[0]["position"][:2]
         # Posiciones distintas cuando el norte cambia
-        assert not (
-            abs(ext_0[0] - ext_90[0]) < 0.01 and abs(ext_0[1] - ext_90[1]) < 0.01
-        )
+        assert not (abs(ext_0[0] - ext_90[0]) < 0.01 and abs(ext_0[1] - ext_90[1]) < 0.01)
 
     def test_cameras_have_lens_field(self) -> None:
         cameras = compute_cameras(self._bbox(), north_angle_deg=0.0)

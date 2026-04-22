@@ -55,8 +55,7 @@ class Polygon2D(BaseModel):
         pts = self.points
         n = len(pts)
         signed_area = math.fsum(
-            pts[i].x * pts[(i + 1) % n].y - pts[(i + 1) % n].x * pts[i].y
-            for i in range(n)
+            pts[i].x * pts[(i + 1) % n].y - pts[(i + 1) % n].x * pts[i].y for i in range(n)
         )
         if abs(signed_area) < 1e-9:
             raise ValueError(

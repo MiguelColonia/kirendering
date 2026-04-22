@@ -64,15 +64,15 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 DOCUMENT_MAP: dict[str, str] = {
-    "GEG": "GEG",                         # Gebäudeenergiegesetz 2023
-    "MBO": "MBO",                          # Musterbauordnung 2016
-    "LBO_Bayern": "LBO_Bayern",            # Bayerische Bauordnung
-    "LBO_BW": "LBO_BW",                   # Landesbauordnung Baden-Württemberg
-    "LBO_NRW": "LBO_NRW",                 # Bauordnung Nordrhein-Westfalen (BauO NRW)
-    "LBO_Hessen": "LBO_Hessen",           # Hessische Bauordnung (HBO)
-    "BauNVO": "BauNVO",                   # Baunutzungsverordnung
-    "WoFlV": "WoFlV",                     # Wohnflächenverordnung
-    "DIN18040": "DIN18040",               # DIN 18040-2 Barrierefreies Bauen
+    "GEG": "GEG",  # Gebäudeenergiegesetz 2023
+    "MBO": "MBO",  # Musterbauordnung 2016
+    "LBO_Bayern": "LBO_Bayern",  # Bayerische Bauordnung
+    "LBO_BW": "LBO_BW",  # Landesbauordnung Baden-Württemberg
+    "LBO_NRW": "LBO_NRW",  # Bauordnung Nordrhein-Westfalen (BauO NRW)
+    "LBO_Hessen": "LBO_Hessen",  # Hessische Bauordnung (HBO)
+    "BauNVO": "BauNVO",  # Baunutzungsverordnung
+    "WoFlV": "WoFlV",  # Wohnflächenverordnung
+    "DIN18040": "DIN18040",  # DIN 18040-2 Barrierefreies Bauen
 }
 
 
@@ -105,9 +105,7 @@ async def run(
     recreate: bool,
     dry_run: bool,
 ) -> None:
-    docs = sorted(
-        p for p in data_dir.iterdir() if p.suffix.lower() in {".pdf", ".xml"}
-    )
+    docs = sorted(p for p in data_dir.iterdir() if p.suffix.lower() in {".pdf", ".xml"})
     if not docs:
         log.warning(
             "No se encontraron archivos PDF/XML en '%s'. "

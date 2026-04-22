@@ -98,11 +98,7 @@ def calculate_metrics(building: Building, solar: Solar) -> UrbanMetrics:
     solar_area = solar_poly.area
 
     # Superficie bruta construida: suma de áreas de todos los espacios en todas las plantas
-    total_gfa = sum(
-        _space_area(sp)
-        for storey in building.storeys
-        for sp in storey.spaces
-    )
+    total_gfa = sum(_space_area(sp) for storey in building.storeys for sp in storey.spaces)
 
     footprint = _ground_floor_footprint_m2(building)
 

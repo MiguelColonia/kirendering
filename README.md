@@ -6,7 +6,7 @@
 
 Cimiento es un copiloto local de anteproyecto residencial para el mercado alemán. Combina conversación asistida por LLM, optimización espacial determinista, generación BIM abierta, consulta normativa con RAG, lectura visual de planos y render fotorrealista a partir del IFC canónico. Todo el flujo está pensado para ejecutarse en local, bajo control del estudio y sin enviar los datos del proyecto a servicios externos por defecto.
 
-En v1.0 el producto ya cubre el ciclo completo de trabajo: crear proyecto, definir Grundstück y programa, generar propuesta, revisar el IFC en 3D, conversar con el copiloto, exportar IFC/DXF/XLSX y producir renders de presentación.
+En v1.0 el producto ya cubre el ciclo completo de trabajo: crear proyecto, definir Grundstück y programa, generar propuesta, revisar el IFC en 3D, conversar con el copiloto, exportar IFC/DXF/XLSX, analizar planos 2D bajo revisión humana y producir renders de presentación o variantes generativas a partir de imágenes.
 
 ### Capacidades principales
 
@@ -18,7 +18,8 @@ En v1.0 el producto ya cubre el ciclo completo de trabajo: crear proyecto, defin
 - Copiloto conversacional con LangGraph y modelos locales en Ollama.
 - Consulta normativa local con Qdrant + embeddings y citas trazables.
 - Ingesta visual de planos 2D con OpenCV + VLM bajo revisión humana.
-- Galería de renders con progreso, referencia visual opcional y descarga HQ.
+- Generación guiada por difusión local (SD 1.5 + ControlNet + InstructPix2Pix) a partir de imágenes de referencia.
+- Galería de renders y difusión con progreso, referencia visual opcional y descarga HQ.
 
 ### Capturas de pantalla
 
@@ -49,7 +50,8 @@ Ruta recomendada de instalación:
 2. Instalar dependencias base del sistema, Docker, Ollama y herramientas Python.
 3. Descargar los modelos locales requeridos.
 4. Levantar el stack en modo desarrollo o producción según [infra/docker/README.md](infra/docker/README.md).
-5. Ejecutar una primera verificación funcional: proyecto, generación, visor IFC, chat y render.
+5. Si se va a usar Ollama con GPU AMD, aplicar el override de servicio con `sudo bash scripts/setup_ollama_gpu.sh`.
+6. Ejecutar una primera verificación funcional: proyecto, generación, visor IFC, chat, visión y render/difusión.
 
 ### Arquitectura
 
@@ -73,7 +75,7 @@ La licencia definitiva sigue pendiente de confirmación del titular. Estado actu
 
 Cimiento ist ein lokal betriebenes Copilot-System fuer den Wohnungsentwurf im deutschen Markt. Es verbindet dialoggestuetzte Assistenz, deterministische Grundrissoptimierung, offene BIM-Erzeugung, normbezogenes RAG, visuelle Planinterpretation und fotorealistisches Rendering auf Basis des kanonischen IFC-Modells. Standardmaessig bleibt der komplette Projektfluss lokal und unter Kontrolle des Bueros.
 
-In v1.0 deckt das Produkt bereits den vollstaendigen Arbeitsablauf ab: Projekt anlegen, Grundstück und Programm definieren, Entwurf berechnen, IFC im Browser pruefen, mit dem Copiloten sprechen, IFC/DXF/XLSX exportieren und Praesentationsrenders erzeugen.
+In v1.0 deckt das Produkt bereits den vollstaendigen Arbeitsablauf ab: Projekt anlegen, Grundstück und Programm definieren, Entwurf berechnen, IFC im Browser pruefen, mit dem Copiloten sprechen, IFC/DXF/XLSX exportieren, 2D-Plaene unter menschlicher Pruefung analysieren und Praesentationsrenders oder generative Bildvarianten erzeugen.
 
 ### Hauptfunktionen
 
@@ -85,7 +87,8 @@ In v1.0 deckt das Produkt bereits den vollstaendigen Arbeitsablauf ab: Projekt a
 - Konversationscopilot mit LangGraph und lokalen Ollama-Modellen.
 - Lokale Normabfrage ueber Qdrant und Embeddings mit nachvollziehbaren Zitaten.
 - Bildgestuetzte Planaufnahme ueber OpenCV + VLM mit verpflichtender menschlicher Pruefung.
-- Render-Galerie mit Fortschritt, optionalem Referenzbild und HQ-Download.
+- Lokale Diffusionspipeline (SD 1.5 + ControlNet + InstructPix2Pix) fuer bildbasierte Varianten.
+- Render- und Diffusionsgalerie mit Fortschritt, optionalem Referenzbild und HQ-Download.
 
 ### Screenshots
 
@@ -116,7 +119,8 @@ Empfohlene Reihenfolge:
 2. Systempakete, Docker, Ollama und Python-Werkzeuge installieren.
 3. Benoetigte lokale Modelle herunterladen.
 4. Entwicklungs- oder Produktionsstack nach [infra/docker/README.md](infra/docker/README.md) starten.
-5. Einen ersten End-to-End-Test fuer Projekt, Generierung, IFC-Viewer, Chat und Render ausfuehren.
+5. Fuer AMD-GPU-Offloading in Ollama den Service-Override mit `sudo bash scripts/setup_ollama_gpu.sh` anwenden.
+6. Einen ersten End-to-End-Test fuer Projekt, Generierung, IFC-Viewer, Chat, Vision sowie Render/Diffusion ausfuehren.
 
 ### Architektur
 

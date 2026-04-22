@@ -15,6 +15,7 @@ def test_sync_tools_are_callable() -> None:
 
 def test_async_tools_are_callable() -> None:
     import asyncio
+
     for name, fn in ASYNC_TOOLS.items():
         assert callable(fn), f"ASYNC_TOOLS['{name}'] no es callable"
         assert asyncio.iscoroutinefunction(fn), f"ASYNC_TOOLS['{name}'] no es coroutine"

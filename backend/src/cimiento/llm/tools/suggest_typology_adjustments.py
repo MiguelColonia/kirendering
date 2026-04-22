@@ -30,8 +30,7 @@ class AdjustmentSuggestion(BaseModel):
     impact_summary: str = Field(
         ...,
         description=(
-            "Descripción concisa del impacto del ajuste: "
-            "qué se reduce/aumenta y en qué medida"
+            "Descripción concisa del impacto del ajuste: qué se reduce/aumenta y en qué medida"
         ),
     )
 
@@ -54,7 +53,7 @@ class AdjustmentResult(BaseModel):
 # Factores de reducción aplicados en cada sugerencia
 # ---------------------------------------------------------------------------
 
-_REDUCTION_MILD = 0.80      # reducción del 20 %
+_REDUCTION_MILD = 0.80  # reducción del 20 %
 _REDUCTION_MODERATE = 0.65  # reducción del 35 %
 _REDUCTION_AGGRESSIVE = 0.50  # reducción del 50 %
 
@@ -128,34 +127,38 @@ def suggest_typology_adjustments(
         for factor in reductions[:max_suggestions]:
             reduced = _reduce_mix(program, factor)
             new_total = sum(e.count for e in reduced.mix)
-            suggestions.append(AdjustmentSuggestion(
-                reason=(
-                    f"Reducir el mix al {round(factor * 100):.0f} % del original "
-                    f"({new_total} unidades en lugar de {total_requested})"
-                ),
-                adjusted_program=reduced,
-                impact_summary=(
-                    f"Se pasa de {total_requested} a {new_total} unidades "
-                    f"(reducción del {round((1 - factor) * 100):.0f} %)."
-                ),
-            ))
+            suggestions.append(
+                AdjustmentSuggestion(
+                    reason=(
+                        f"Reducir el mix al {round(factor * 100):.0f} % del original "
+                        f"({new_total} unidades en lugar de {total_requested})"
+                    ),
+                    adjusted_program=reduced,
+                    impact_summary=(
+                        f"Se pasa de {total_requested} a {new_total} unidades "
+                        f"(reducción del {round((1 - factor) * 100):.0f} %)."
+                    ),
+                )
+            )
             if len(suggestions) >= max_suggestions:
                 break
         # Añadir planta como alternativa si cabe en max_suggestions
         if len(suggestions) < max_suggestions:
             with_floor = _add_floor(program)
-            suggestions.append(AdjustmentSuggestion(
-                reason=(
-                    f"Añadir una planta al programa "
-                    f"({program.num_floors} → {with_floor.num_floors} plantas) "
-                    "manteniendo el mismo mix"
-                ),
-                adjusted_program=with_floor,
-                impact_summary=(
-                    f"El volumen edificable aumenta en ~{program.num_floors + 1} "
-                    f"veces la superficie de planta."
-                ),
-            ))
+            suggestions.append(
+                AdjustmentSuggestion(
+                    reason=(
+                        f"Añadir una planta al programa "
+                        f"({program.num_floors} → {with_floor.num_floors} plantas) "
+                        "manteniendo el mismo mix"
+                    ),
+                    adjusted_program=with_floor,
+                    impact_summary=(
+                        f"El volumen edificable aumenta en ~{program.num_floors + 1} "
+                        f"veces la superficie de planta."
+                    ),
+                )
+            )
 
     elif solution.status in (SolutionStatus.TIMEOUT, SolutionStatus.FEASIBLE):
         fulfillment = solution.metrics.typology_fulfillment
@@ -166,41 +169,47 @@ def suggest_typology_adjustments(
             explanation = (
                 f"El solver colocó {solution.metrics.num_units_placed} de "
                 f"{total_requested} unidades solicitadas "
-                + ("TIMEOUT: sin solución óptima"
-                   if solution.status == SolutionStatus.TIMEOUT
-                   else "solución parcial")
+                + (
+                    "TIMEOUT: sin solución óptima"
+                    if solution.status == SolutionStatus.TIMEOUT
+                    else "solución parcial"
+                )
                 + ")."
             )
             # Sugerencia 1: reducción proporcional al peor cumplimiento
             factor = max(_REDUCTION_MILD, worst_rate)
             reduced = _reduce_mix(program, factor)
             new_total = sum(e.count for e in reduced.mix)
-            suggestions.append(AdjustmentSuggestion(
-                reason=(
-                    f"Ajustar el mix al cumplimiento observado ({round(worst_rate * 100):.0f} %) "
-                    f"de la tipología con peor resultado"
-                    + (f" ('{worst_tid}')" if worst_tid else "")
-                ),
-                adjusted_program=reduced,
-                impact_summary=(
-                    f"De {total_requested} a {new_total} unidades "
-                    f"(factor {round(factor, 2):.2f})."
-                ),
-            ))
+            suggestions.append(
+                AdjustmentSuggestion(
+                    reason=(
+                        f"Ajustar el mix al cumplimiento observado ({round(worst_rate * 100):.0f} %) "
+                        f"de la tipología con peor resultado"
+                        + (f" ('{worst_tid}')" if worst_tid else "")
+                    ),
+                    adjusted_program=reduced,
+                    impact_summary=(
+                        f"De {total_requested} a {new_total} unidades "
+                        f"(factor {round(factor, 2):.2f})."
+                    ),
+                )
+            )
             # Sugerencia 2: añadir planta
             if len(suggestions) < max_suggestions:
                 with_floor = _add_floor(program)
-                suggestions.append(AdjustmentSuggestion(
-                    reason=(
-                        f"Añadir una planta ({program.num_floors} → {with_floor.num_floors}) "
-                        "para dar más capacidad al solver"
-                    ),
-                    adjusted_program=with_floor,
-                    impact_summary=(
-                        "La distribución dispone de más superficie; "
-                        "puede mejorar el cumplimiento sin reducir el mix."
-                    ),
-                ))
+                suggestions.append(
+                    AdjustmentSuggestion(
+                        reason=(
+                            f"Añadir una planta ({program.num_floors} → {with_floor.num_floors}) "
+                            "para dar más capacidad al solver"
+                        ),
+                        adjusted_program=with_floor,
+                        impact_summary=(
+                            "La distribución dispone de más superficie; "
+                            "puede mejorar el cumplimiento sin reducir el mix."
+                        ),
+                    )
+                )
         else:
             explanation = (
                 "La solución alcanza un cumplimiento alto. "

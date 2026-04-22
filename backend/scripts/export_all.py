@@ -101,8 +101,16 @@ def _draw_svg(solar: Solar, solution, output_path: Path) -> None:
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w:.0f}" height="{h:.0f}">',
         f'<polygon points="{solar_pts}" fill="none" stroke="#333" stroke-width="2"/>',
     ]
-    colors = ["#4A90D9", "#E67E22", "#27AE60", "#8E44AD", "#E74C3C",
-              "#16A085", "#D35400", "#2980B9"]
+    colors = [
+        "#4A90D9",
+        "#E67E22",
+        "#27AE60",
+        "#8E44AD",
+        "#E74C3C",
+        "#16A085",
+        "#D35400",
+        "#2980B9",
+    ]
     for i, p in enumerate(solution.placements):
         b = p.bbox
         c = colors[i % len(colors)]
@@ -139,8 +147,10 @@ def run(yaml_path: Path, timeout: int) -> None:
     t0 = time.perf_counter()
     solution = solve(solar, program, timeout_seconds=timeout)
     t_solver = time.perf_counter() - t0
-    print(f"  Solver:  {solution.status} — {solution.metrics.num_units_placed} unidades "
-          f"en {t_solver:.3f}s")
+    print(
+        f"  Solver:  {solution.status} — {solution.metrics.num_units_placed} unidades "
+        f"en {t_solver:.3f}s"
+    )
 
     parking_solution = None
     if parking_cfg.get("enabled", False):
@@ -206,10 +216,12 @@ def run(yaml_path: Path, timeout: int) -> None:
 
     # Validar IFC
     vr = validate_ifc(ifc_path)
-    print(f"\n  Validación IFC: {'OK' if vr.valid else 'ERROR'} — "
-          f"{vr.num_buildings} edificio(s), {vr.num_storeys} planta(s), "
-          f"{vr.num_spaces} espacios, {vr.num_walls} muros, "
-          f"{vr.num_doors} puertas")
+    print(
+        f"\n  Validación IFC: {'OK' if vr.valid else 'ERROR'} — "
+        f"{vr.num_buildings} edificio(s), {vr.num_storeys} planta(s), "
+        f"{vr.num_spaces} espacios, {vr.num_walls} muros, "
+        f"{vr.num_doors} puertas"
+    )
     if vr.warnings:
         for w in vr.warnings:
             print(f"    ⚠  {w}")

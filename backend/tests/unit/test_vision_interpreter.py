@@ -76,7 +76,7 @@ def test_extract_json_from_plain_json() -> None:
 
 
 def test_extract_json_from_wrapped_text() -> None:
-    payload = "Here is the result:\n{\"rooms\": []}\nDone."
+    payload = 'Here is the result:\n{"rooms": []}\nDone.'
     assert _extract_json(payload) == {"rooms": []}
 
 
@@ -168,10 +168,18 @@ def test_parse_room_regions_valid() -> None:
 def test_parse_room_regions_invalid_room_type_skipped() -> None:
     payload = {
         "rooms": [
-            {"label": "X", "room_type": "ROOF_TERRACE", "center_px": [50, 50],
-             "bbox_px": [0, 0, 100, 100]},
-            {"label": "Bad", "room_type": "BATHROOM", "center_px": [200, 50],
-             "bbox_px": [100, 0, 100, 100]},
+            {
+                "label": "X",
+                "room_type": "ROOF_TERRACE",
+                "center_px": [50, 50],
+                "bbox_px": [0, 0, 100, 100],
+            },
+            {
+                "label": "Bad",
+                "room_type": "BATHROOM",
+                "center_px": [200, 50],
+                "bbox_px": [100, 0, 100, 100],
+            },
         ]
     }
     regions = _parse_room_regions(payload)
@@ -186,12 +194,14 @@ def test_parse_room_regions_invalid_room_type_skipped() -> None:
 
 @pytest.mark.asyncio
 async def test_identify_symbols_returns_list() -> None:
-    symbols_json = json.dumps({
-        "symbols": [
-            {"type": "DOOR", "bbox_px": [50, 10, 20, 5], "confidence": 0.95},
-            {"type": "WINDOW", "bbox_px": [100, 10, 25, 5], "confidence": 0.85},
-        ]
-    })
+    symbols_json = json.dumps(
+        {
+            "symbols": [
+                {"type": "DOOR", "bbox_px": [50, 10, 20, 5], "confidence": 0.95},
+                {"type": "WINDOW", "bbox_px": [100, 10, 25, 5], "confidence": 0.85},
+            ]
+        }
+    )
     client = _make_vlm_client(symbols_json)
     img = _make_floor_plan()
 
@@ -212,14 +222,16 @@ async def test_identify_symbols_empty_response() -> None:
 
 @pytest.mark.asyncio
 async def test_read_labels_german_labels() -> None:
-    labels_json = json.dumps({
-        "labels": [
-            {"text": "Wohnzimmer", "room_type": "LIVING", "bbox_px": [20, 40, 90, 18]},
-            {"text": "Schlafzimmer", "room_type": "BEDROOM", "bbox_px": [210, 40, 95, 18]},
-            {"text": "Küche", "room_type": "KITCHEN", "bbox_px": [20, 165, 50, 18]},
-            {"text": "Bad", "room_type": "BATHROOM", "bbox_px": [210, 165, 35, 18]},
-        ]
-    })
+    labels_json = json.dumps(
+        {
+            "labels": [
+                {"text": "Wohnzimmer", "room_type": "LIVING", "bbox_px": [20, 40, 90, 18]},
+                {"text": "Schlafzimmer", "room_type": "BEDROOM", "bbox_px": [210, 40, 95, 18]},
+                {"text": "Küche", "room_type": "KITCHEN", "bbox_px": [20, 165, 50, 18]},
+                {"text": "Bad", "room_type": "BATHROOM", "bbox_px": [210, 165, 35, 18]},
+            ]
+        }
+    )
     client = _make_vlm_client(labels_json)
     img = _make_floor_plan()
 
@@ -234,11 +246,13 @@ async def test_read_labels_german_labels() -> None:
 
 @pytest.mark.asyncio
 async def test_read_labels_infers_room_type_from_german_text() -> None:
-    labels_json = json.dumps({
-        "labels": [
-            {"text": "Flur", "room_type": None, "bbox_px": [10, 10, 30, 12]},
-        ]
-    })
+    labels_json = json.dumps(
+        {
+            "labels": [
+                {"text": "Flur", "room_type": None, "bbox_px": [10, 10, 30, 12]},
+            ]
+        }
+    )
     client = _make_vlm_client(labels_json)
     img = _make_floor_plan()
 
@@ -249,14 +263,24 @@ async def test_read_labels_infers_room_type_from_german_text() -> None:
 
 @pytest.mark.asyncio
 async def test_estimate_room_types_returns_regions() -> None:
-    rooms_json = json.dumps({
-        "rooms": [
-            {"label": "Wohnzimmer", "room_type": "LIVING", "center_px": [100, 75],
-             "bbox_px": [10, 10, 180, 130]},
-            {"label": "Schlafzimmer", "room_type": "BEDROOM", "center_px": [300, 75],
-             "bbox_px": [210, 10, 180, 130]},
-        ]
-    })
+    rooms_json = json.dumps(
+        {
+            "rooms": [
+                {
+                    "label": "Wohnzimmer",
+                    "room_type": "LIVING",
+                    "center_px": [100, 75],
+                    "bbox_px": [10, 10, 180, 130],
+                },
+                {
+                    "label": "Schlafzimmer",
+                    "room_type": "BEDROOM",
+                    "center_px": [300, 75],
+                    "bbox_px": [210, 10, 180, 130],
+                },
+            ]
+        }
+    )
     client = _make_vlm_client(rooms_json)
     img = _make_floor_plan()
 
@@ -359,22 +383,24 @@ async def test_combine_preprocessing_and_vlm_full_pipeline(tmp_path: Path) -> No
     plan = _make_floor_plan()
     cv2.imwrite(str(img_path), plan)
 
-    symbols_resp = json.dumps({
-        "symbols": [{"type": "DOOR", "bbox_px": [195, 10, 10, 5], "confidence": 0.9}]
-    })
-    labels_resp = json.dumps({
-        "labels": [{"text": "Wohnzimmer", "room_type": "LIVING", "bbox_px": [20, 45, 90, 18]}]
-    })
-    rooms_resp = json.dumps({
-        "rooms": [
-            {
-                "label": "Wohnzimmer",
-                "room_type": "LIVING",
-                "center_px": [100, 75],
-                "bbox_px": [10, 10, 180, 130],
-            }
-        ]
-    })
+    symbols_resp = json.dumps(
+        {"symbols": [{"type": "DOOR", "bbox_px": [195, 10, 10, 5], "confidence": 0.9}]}
+    )
+    labels_resp = json.dumps(
+        {"labels": [{"text": "Wohnzimmer", "room_type": "LIVING", "bbox_px": [20, 45, 90, 18]}]}
+    )
+    rooms_resp = json.dumps(
+        {
+            "rooms": [
+                {
+                    "label": "Wohnzimmer",
+                    "room_type": "LIVING",
+                    "center_px": [100, 75],
+                    "bbox_px": [10, 10, 180, 130],
+                }
+            ]
+        }
+    )
 
     call_count = 0
     responses = [symbols_resp, labels_resp, rooms_resp]

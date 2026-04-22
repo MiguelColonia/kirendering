@@ -181,29 +181,35 @@ async def chat_stream(
             event_type: str = event.get("event", "")
 
             if event_type == "on_chain_start" and event_name in _GRAPH_NODES:
-                await websocket.send_json({
-                    "type": "node_start",
-                    "node": event_name,
-                    "label": _NODE_LABELS[event_name],
-                })
+                await websocket.send_json(
+                    {
+                        "type": "node_start",
+                        "node": event_name,
+                        "label": _NODE_LABELS[event_name],
+                    }
+                )
 
             elif event_type == "on_chain_end" and event_name in _GRAPH_NODES:
-                await websocket.send_json({
-                    "type": "node_end",
-                    "node": event_name,
-                })
+                await websocket.send_json(
+                    {
+                        "type": "node_end",
+                        "node": event_name,
+                    }
+                )
                 # Capturar el estado de salida del último nodo para la respuesta final
                 output = event.get("data", {}).get("output") or {}
                 if isinstance(output, dict):
                     final_state.update(output)
 
         response, feasible, solution = _extract_final_state(final_state)
-        await websocket.send_json({
-            "type": "done",
-            "response": response,
-            "feasible": feasible,
-            "solution": solution,
-        })
+        await websocket.send_json(
+            {
+                "type": "done",
+                "response": response,
+                "feasible": feasible,
+                "solution": solution,
+            }
+        )
         await websocket.close()
 
     except WebSocketDisconnect:
@@ -211,10 +217,12 @@ async def chat_stream(
     except Exception:
         logger.exception("Error en chat stream del proyecto '%s'", project_id)
         try:
-            await websocket.send_json({
-                "type": "error",
-                "message": "Interner Fehler bei der Verarbeitung der Anfrage.",
-            })
+            await websocket.send_json(
+                {
+                    "type": "error",
+                    "message": "Interner Fehler bei der Verarbeitung der Anfrage.",
+                }
+            )
             await websocket.close()
         except Exception:  # noqa: BLE001
             pass

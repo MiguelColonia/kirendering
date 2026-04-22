@@ -423,8 +423,7 @@ def run_render(config: RenderConfig) -> RenderResult:
         if result.returncode != 0:
             logger.error("Blender stderr:\n%s", stderr[-2000:])
             raise RuntimeError(
-                f"Blender terminó con código {result.returncode}. "
-                f"Últimas líneas:\n{stderr[-800:]}"
+                f"Blender terminó con código {result.returncode}. Últimas líneas:\n{stderr[-800:]}"
             )
 
         blender_version = _parse_blender_version(stderr)

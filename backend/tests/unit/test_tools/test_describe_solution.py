@@ -114,10 +114,14 @@ def ollama_mock() -> Iterator[MockServer]:
 def solar() -> Solar:
     return Solar(
         id="s1",
-        contour=Polygon2D(points=[
-            Point2D(x=0, y=0), Point2D(x=20, y=0),
-            Point2D(x=20, y=30), Point2D(x=0, y=30),
-        ]),
+        contour=Polygon2D(
+            points=[
+                Point2D(x=0, y=0),
+                Point2D(x=20, y=0),
+                Point2D(x=20, y=30),
+                Point2D(x=0, y=30),
+            ]
+        ),
         north_angle_deg=0.0,
         max_buildable_height_m=9.0,
     )
@@ -126,12 +130,17 @@ def solar() -> Solar:
 @pytest.fixture
 def program() -> Program:
     return Program(
-        project_id="p1", num_floors=1, floor_height_m=3.0,
+        project_id="p1",
+        num_floors=1,
+        floor_height_m=3.0,
         typologies=[
             Typology(
-                id="T2", name="Zweizimmerwohnung",
-                min_useful_area=70.0, max_useful_area=90.0,
-                num_bedrooms=2, num_bathrooms=1,
+                id="T2",
+                name="Zweizimmerwohnung",
+                min_useful_area=70.0,
+                max_useful_area=90.0,
+                num_bedrooms=2,
+                num_bathrooms=1,
                 rooms=[Room(type=RoomType.LIVING, min_area=20.0, min_short_side=3.5)],
             )
         ],
@@ -233,7 +242,7 @@ async def test_describe_solution_user_prompt_contains_data(
     messages = ollama_mock.requests[0]["messages"]
     user_msg = next(m for m in messages if m["role"] == "user")
     assert "OPTIMAL" in user_msg["content"]
-    assert "3" in user_msg["content"]   # num_units_placed
+    assert "3" in user_msg["content"]  # num_units_placed
 
 
 @pytest.mark.asyncio

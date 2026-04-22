@@ -104,34 +104,34 @@ _GERMAN_LABEL_TO_ROOM_TYPE: dict[str, RoomType] = {
 _SYMBOL_PROMPT = (
     "Analyze this architectural floor plan. Identify all architectural symbols: "
     "doors (Türen), windows (Fenster), stairs (Treppen), and structural columns (Stützen). "
-    "Return ONLY valid JSON with key \"symbols\", a list where each item has:\n"
-    "- \"type\": one of \"DOOR\", \"WINDOW\", \"STAIR\", \"COLUMN\", \"UNKNOWN\"\n"
-    "- \"bbox_px\": [x, y, width, height] in pixels (top-left origin)\n"
-    "- \"confidence\": float 0.0-1.0\n"
-    "If no symbols are found, return {\"symbols\": []}."
+    'Return ONLY valid JSON with key "symbols", a list where each item has:\n'
+    '- "type": one of "DOOR", "WINDOW", "STAIR", "COLUMN", "UNKNOWN"\n'
+    '- "bbox_px": [x, y, width, height] in pixels (top-left origin)\n'
+    '- "confidence": float 0.0-1.0\n'
+    'If no symbols are found, return {"symbols": []}.'
 )
 
 _LABELS_PROMPT = (
     "Analyze this architectural floor plan. Find all room labels "
     "(German text such as Wohnzimmer, Schlafzimmer, Küche, Bad, Flur, etc.). "
-    "Return ONLY valid JSON with key \"labels\", a list where each item has:\n"
-    "- \"text\": exact text as visible in the plan\n"
-    "- \"room_type\": one of \"LIVING\", \"KITCHEN\", \"BEDROOM\", \"BATHROOM\", "
-    "\"CORRIDOR\", \"STORAGE\", \"PARKING\", or null if not a room label\n"
-    "- \"bbox_px\": [x, y, width, height] approximate bounding box in pixels\n"
-    "If no labels found, return {\"labels\": []}."
+    'Return ONLY valid JSON with key "labels", a list where each item has:\n'
+    '- "text": exact text as visible in the plan\n'
+    '- "room_type": one of "LIVING", "KITCHEN", "BEDROOM", "BATHROOM", '
+    '"CORRIDOR", "STORAGE", "PARKING", or null if not a room label\n'
+    '- "bbox_px": [x, y, width, height] approximate bounding box in pixels\n'
+    'If no labels found, return {"labels": []}.'
 )
 
 _ROOMS_PROMPT = (
     "Analyze this architectural floor plan. Identify ALL enclosed rooms and spaces. "
     "For each room, determine its type from shape, size, fixtures, and visible labels. "
-    "Return ONLY valid JSON with key \"rooms\", a list where each item has:\n"
-    "- \"label\": visible label text or a descriptive name if no label is visible\n"
-    "- \"room_type\": one of \"LIVING\", \"KITCHEN\", \"BEDROOM\", \"BATHROOM\", "
-    "\"CORRIDOR\", \"STORAGE\", \"PARKING\"\n"
-    "- \"center_px\": [x, y] approximate center in pixels\n"
-    "- \"bbox_px\": [x, y, width, height] approximate bounding box in pixels\n"
-    "If no rooms found, return {\"rooms\": []}."
+    'Return ONLY valid JSON with key "rooms", a list where each item has:\n'
+    '- "label": visible label text or a descriptive name if no label is visible\n'
+    '- "room_type": one of "LIVING", "KITCHEN", "BEDROOM", "BATHROOM", '
+    '"CORRIDOR", "STORAGE", "PARKING"\n'
+    '- "center_px": [x, y] approximate center in pixels\n'
+    '- "bbox_px": [x, y, width, height] approximate bounding box in pixels\n'
+    'If no rooms found, return {"rooms": []}.'
 )
 
 # ---------------------------------------------------------------------------
@@ -411,9 +411,7 @@ async def read_labels(
 
     context = ""
     if ocr_regions:
-        region_list = "; ".join(
-            f"({x},{y},{w},{h})" for x, y, w, h in ocr_regions[:20]
-        )
+        region_list = "; ".join(f"({x},{y},{w},{h})" for x, y, w, h in ocr_regions[:20])
         context = (
             f"\nOpenCV detected {len(ocr_regions)} text region candidates at: {region_list}. "
             "Use these as hints for bounding boxes but rely on visual content for text."
@@ -485,8 +483,7 @@ async def combine_preprocessing_and_vlm(
 
     line_segments = detect_lines(img)
     wall_segments_px = [
-        WallSegmentPx(x1=p1[0], y1=p1[1], x2=p2[0], y2=p2[1])
-        for p1, p2 in line_segments
+        WallSegmentPx(x1=p1[0], y1=p1[1], x2=p2[0], y2=p2[1]) for p1, p2 in line_segments
     ]
 
     meters_per_pixel = await extract_scale(img, vlm_client)

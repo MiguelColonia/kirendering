@@ -79,12 +79,14 @@ class MockServer:
     _thread: threading.Thread
 
     def enqueue(self, content: str, model: str = "qwen2.5:7b-instruct-q4_K_M") -> None:
-        self.state.queued_responses.append({
-            "model": model,
-            "created_at": "2026-04-20T10:00:00Z",
-            "message": {"role": "assistant", "content": content},
-            "done": True,
-        })
+        self.state.queued_responses.append(
+            {
+                "model": model,
+                "created_at": "2026-04-20T10:00:00Z",
+                "message": {"role": "assistant", "content": content},
+                "done": True,
+            }
+        )
 
     @property
     def call_count(self) -> int:
@@ -125,58 +127,67 @@ def _make_graph(mock: MockServer) -> Any:
 # Payloads de respuesta reutilizables
 # ---------------------------------------------------------------------------
 
-_PARAMS_COMPLETE = json.dumps({
-    "solar_width_m": 20.0,
-    "solar_height_m": 30.0,
-    "num_floors": 1,
-    "floor_height_m": 3.0,
-    "typology_entries": [
-        {"id": "T2", "name": "Zweizimmerwohnung", "min_area": 70.0, "count": 2}
-    ],
-    "is_complete": True,
-    "clarification_needed_de": None,
-})
+_PARAMS_COMPLETE = json.dumps(
+    {
+        "solar_width_m": 20.0,
+        "solar_height_m": 30.0,
+        "num_floors": 1,
+        "floor_height_m": 3.0,
+        "typology_entries": [
+            {"id": "T2", "name": "Zweizimmerwohnung", "min_area": 70.0, "count": 2}
+        ],
+        "is_complete": True,
+        "clarification_needed_de": None,
+    }
+)
 
-_PARAMS_INCOMPLETE = json.dumps({
-    "solar_width_m": None,
-    "solar_height_m": None,
-    "num_floors": 1,
-    "floor_height_m": 3.0,
-    "typology_entries": [],
-    "is_complete": False,
-    "clarification_needed_de": (
-        "Bitte geben Sie die Grundstücksmaße (Breite × Tiefe in Metern) an."
-    ),
-})
+_PARAMS_INCOMPLETE = json.dumps(
+    {
+        "solar_width_m": None,
+        "solar_height_m": None,
+        "num_floors": 1,
+        "floor_height_m": 3.0,
+        "typology_entries": [],
+        "is_complete": False,
+        "clarification_needed_de": (
+            "Bitte geben Sie die Grundstücksmaße (Breite × Tiefe in Metern) an."
+        ),
+    }
+)
 
-_PARAMS_TINY_SOLAR = json.dumps({
-    "solar_width_m": 4.0,
-    "solar_height_m": 4.0,
-    "num_floors": 1,
-    "floor_height_m": 3.0,
-    "typology_entries": [
-        {"id": "T2", "name": "Zweizimmerwohnung", "min_area": 70.0, "count": 2}
-    ],
-    "is_complete": True,
-    "clarification_needed_de": None,
-})
+_PARAMS_TINY_SOLAR = json.dumps(
+    {
+        "solar_width_m": 4.0,
+        "solar_height_m": 4.0,
+        "num_floors": 1,
+        "floor_height_m": 3.0,
+        "typology_entries": [
+            {"id": "T2", "name": "Zweizimmerwohnung", "min_area": 70.0, "count": 2}
+        ],
+        "is_complete": True,
+        "clarification_needed_de": None,
+    }
+)
 
-_VALIDATION_OK = json.dumps({
-    "ok": True,
-    "warnings": [],
-    "errors": [],
-    "message_de": "Die Parameter entsprechen den normativen Anforderungen.",
-})
+_VALIDATION_OK = json.dumps(
+    {
+        "ok": True,
+        "warnings": [],
+        "errors": [],
+        "message_de": "Die Parameter entsprechen den normativen Anforderungen.",
+    }
+)
 
-_VALIDATION_ERROR = json.dumps({
-    "ok": False,
-    "warnings": [],
-    "errors": ["Die Geschosszahl überschreitet die zulässige Gebäudehöhe."],
-    "message_de": (
-        "Der Entwurf kann nicht realisiert werden: "
-        "Die maximale Gebäudehöhe wird überschritten."
-    ),
-})
+_VALIDATION_ERROR = json.dumps(
+    {
+        "ok": False,
+        "warnings": [],
+        "errors": ["Die Geschosszahl überschreitet die zulässige Gebäudehöhe."],
+        "message_de": (
+            "Der Entwurf kann nicht realisiert werden: Die maximale Gebäudehöhe wird überschritten."
+        ),
+    }
+)
 
 _DESCRIPTION_DE = "Die Lösung ist optimal. Es wurden 2 Wohneinheiten platziert."
 

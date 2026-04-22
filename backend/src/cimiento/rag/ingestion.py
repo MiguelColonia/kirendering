@@ -50,9 +50,7 @@ _MAX_WORDS_PER_CHUNK = 1_200
 # Patrón de artículo: línea que comienza con "§ N" o "§ Na" (p.ej. § 14a).
 # Ancla al comienzo de línea para evitar falsos positivos en referencias inline como
 # "gemäß § 14 Abs. 2".
-_ARTICLE_RE = re.compile(
-    r"(?m)^[ \t]*(§[ \t]*\d+[a-zA-Z]?)[ \t]*(.*?)[ \t]*$"
-)
+_ARTICLE_RE = re.compile(r"(?m)^[ \t]*(§[ \t]*\d+[a-zA-Z]?)[ \t]*(.*?)[ \t]*$")
 
 # Patrón de sección estructural: Abschnitt, Teil, Kapitel, Anhang, Anlage.
 _SECTION_RE = re.compile(
@@ -102,8 +100,7 @@ def extract_text_from_pdf(pdf_path: Path) -> tuple[str, dict[str, Any]]:
         import pdfplumber  # importación diferida; no requerida en tiempo de import del módulo
     except ImportError as exc:
         raise ImportError(
-            "pdfplumber es necesario para la ingesta de PDFs. "
-            "Instálalo con: pip install pdfplumber"
+            "pdfplumber es necesario para la ingesta de PDFs. Instálalo con: pip install pdfplumber"
         ) from exc
 
     parts: list[str] = []
@@ -201,9 +198,7 @@ def chunk_by_article(
     # Preámbulo: texto antes del primer marcador
     preamble = full_text[: markers[0][0]].strip()
     if preamble:
-        chunks.append(
-            _make_chunk(document, default_section, "Präambel", "Präambel", preamble, {})
-        )
+        chunks.append(_make_chunk(document, default_section, "Präambel", "Präambel", preamble, {}))
 
     # Procesar cada marcador
     for i, (pos, kind, number, title) in enumerate(markers):

@@ -240,8 +240,7 @@ class Space(BaseModel):
         pts = self.contour.points
         n = len(pts)
         signed_area = math.fsum(
-            pts[i].x * pts[(i + 1) % n].y - pts[(i + 1) % n].x * pts[i].y
-            for i in range(n)
+            pts[i].x * pts[(i + 1) % n].y - pts[(i + 1) % n].x * pts[i].y for i in range(n)
         )
         return abs(signed_area) / 2.0
 
@@ -481,9 +480,7 @@ class Building(BaseModel):
     )
     metadata: dict[str, str | int | float | None] = Field(
         default_factory=dict,
-        description=(
-            "Atributos libres del edificio: architect, date, cadastral_ref, client, etc."
-        ),
+        description=("Atributos libres del edificio: architect, date, cadastral_ref, client, etc."),
     )
 
     @model_validator(mode="after")

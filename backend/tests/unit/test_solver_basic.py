@@ -184,9 +184,7 @@ def test_solver_respects_timeout(
 
     solution: Solution = solve(sample_solar_rectangular, program, timeout_seconds=1)
 
-    assert solution.status != SolutionStatus.ERROR, (
-        f"El solver devolvió ERROR: {solution.message}"
-    )
+    assert solution.status != SolutionStatus.ERROR, f"El solver devolvió ERROR: {solution.message}"
     assert solution.solver_time_seconds <= 2.0, (
         f"El solver tardó {solution.solver_time_seconds:.2f} s, más del doble del timeout"
     )
@@ -338,13 +336,13 @@ def test_all_placements_contained_in_solar_polygon(
     solution = solve(sample_solar_rectangular, program)
     assert solution.status in (SolutionStatus.OPTIMAL, SolutionStatus.FEASIBLE)
 
-    solar_poly = ShapelyPolygon(
-        [(p.x, p.y) for p in sample_solar_rectangular.contour.points]
-    )
+    solar_poly = ShapelyPolygon([(p.x, p.y) for p in sample_solar_rectangular.contour.points])
     for i, p in enumerate(solution.placements):
         unit_box = shapely_box(
-            p.bbox.x, p.bbox.y,
-            p.bbox.x + p.bbox.width, p.bbox.y + p.bbox.height,
+            p.bbox.x,
+            p.bbox.y,
+            p.bbox.x + p.bbox.width,
+            p.bbox.y + p.bbox.height,
         )
         assert solar_poly.covers(unit_box), (
             f"Unidad {i} en ({p.bbox.x:.2f},{p.bbox.y:.2f})–"
@@ -380,13 +378,13 @@ def test_all_cores_contained_in_solar_polygon(
     assert solution.status in (SolutionStatus.OPTIMAL, SolutionStatus.FEASIBLE)
     assert solution.communication_cores, "Se esperaba al menos un núcleo"
 
-    solar_poly = ShapelyPolygon(
-        [(p.x, p.y) for p in sample_solar_rectangular.contour.points]
-    )
+    solar_poly = ShapelyPolygon([(p.x, p.y) for p in sample_solar_rectangular.contour.points])
     for i, core in enumerate(solution.communication_cores):
         core_box = shapely_box(
-            core.position.x, core.position.y,
-            core.position.x + core.width_m, core.position.y + core.depth_m,
+            core.position.x,
+            core.position.y,
+            core.position.x + core.width_m,
+            core.position.y + core.depth_m,
         )
         assert solar_poly.covers(core_box), (
             f"Núcleo {i} en ({core.position.x:.2f},{core.position.y:.2f}) "
@@ -410,12 +408,14 @@ def test_units_on_different_floors_may_share_xy_position(
     # pero no caben 2 T2 en la misma planta (2×7=14 > 12 m de ancho).
     narrow_solar = Solar(
         id="solar-narrow-12x11",
-        contour=Polygon2D(points=[
-            Point2D(x=0.0, y=0.0),
-            Point2D(x=12.0, y=0.0),
-            Point2D(x=12.0, y=11.0),
-            Point2D(x=0.0, y=11.0),
-        ]),
+        contour=Polygon2D(
+            points=[
+                Point2D(x=0.0, y=0.0),
+                Point2D(x=12.0, y=0.0),
+                Point2D(x=12.0, y=11.0),
+                Point2D(x=0.0, y=11.0),
+            ]
+        ),
         north_angle_deg=0.0,
         max_buildable_height_m=9.0,
     )
@@ -496,7 +496,7 @@ def test_solver_mixed_typologies_all_placed(
     assert solution.metrics.typology_fulfillment["T2"] == pytest.approx(1.0)
 
     for i, a in enumerate(solution.placements):
-        for b in solution.placements[i + 1:]:
+        for b in solution.placements[i + 1 :]:
             if a.floor == b.floor:
                 assert not _rectangles_overlap(a.bbox, b.bbox), (
                     f"Solapamiento en planta {a.floor} entre unidades {i} y {i + 1}"
@@ -520,14 +520,16 @@ def test_solver_l_shaped_solar_units_inside_polygon(
 
     l_solar = Solar(
         id="solar-l-shape-20x30",
-        contour=Polygon2D(points=[
-            Point2D(x=0.0, y=0.0),
-            Point2D(x=20.0, y=0.0),
-            Point2D(x=20.0, y=15.0),
-            Point2D(x=10.0, y=15.0),
-            Point2D(x=10.0, y=30.0),
-            Point2D(x=0.0, y=30.0),
-        ]),
+        contour=Polygon2D(
+            points=[
+                Point2D(x=0.0, y=0.0),
+                Point2D(x=20.0, y=0.0),
+                Point2D(x=20.0, y=15.0),
+                Point2D(x=10.0, y=15.0),
+                Point2D(x=10.0, y=30.0),
+                Point2D(x=0.0, y=30.0),
+            ]
+        ),
         north_angle_deg=0.0,
         max_buildable_height_m=9.0,
     )
@@ -545,13 +547,13 @@ def test_solver_l_shaped_solar_units_inside_polygon(
     assert solution.status in (SolutionStatus.OPTIMAL, SolutionStatus.FEASIBLE)
     assert solution.metrics.num_units_placed == 3
 
-    solar_poly = ShapelyPolygon(
-        [(p.x, p.y) for p in l_solar.contour.points]
-    )
+    solar_poly = ShapelyPolygon([(p.x, p.y) for p in l_solar.contour.points])
     for i, p in enumerate(solution.placements):
         unit_box = shapely_box(
-            p.bbox.x, p.bbox.y,
-            p.bbox.x + p.bbox.width, p.bbox.y + p.bbox.height,
+            p.bbox.x,
+            p.bbox.y,
+            p.bbox.x + p.bbox.width,
+            p.bbox.y + p.bbox.height,
         )
         assert solar_poly.covers(unit_box), (
             f"Unidad {i} en ({p.bbox.x:.2f},{p.bbox.y:.2f})–"

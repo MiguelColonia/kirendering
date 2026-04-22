@@ -5,7 +5,9 @@ from __future__ import annotations
 ERROR_MESSAGES_DE: dict[str, str] = {
     "PROJECT_NOT_FOUND": "Das Projekt wurde nicht gefunden.",
     "PROJECT_HAS_NO_VERSION": "Für dieses Projekt ist keine gespeicherte Version vorhanden.",
-    "PROJECT_HAS_NO_IFC": "Für dieses Projekt liegt noch kein IFC-Modell vor. Erzeugen Sie zuerst einen Entwurf.",
+    "PROJECT_HAS_NO_IFC": (
+        "Für dieses Projekt liegt noch kein IFC-Modell vor. Erzeugen Sie zuerst einen Entwurf."
+    ),
     "JOB_NOT_FOUND": "Der Auftrag wurde nicht gefunden.",
     "OUTPUT_NOT_FOUND": "Die angeforderte Datei wurde nicht gefunden.",
     "RENDER_NOT_FOUND": "Der angeforderte Render wurde nicht gefunden.",
@@ -24,6 +26,19 @@ ERROR_MESSAGES_DE: dict[str, str] = {
     "OLLAMA_UNAVAILABLE": "Ollama ist derzeit nicht erreichbar.",
     "QDRANT_UNAVAILABLE": "Qdrant ist derzeit nicht erreichbar.",
     "INTERNAL_ERROR": "Ein interner Fehler ist aufgetreten.",
+    "UNSUPPORTED_PLAN_IMAGE": (
+        "Als Grundrissbild werden nur PNG, JPG, JPEG, WEBP, TIF oder TIFF unterstützt."
+    ),
+    "VISION_ANALYSIS_FAILED": (
+        "Die Grundrissanalyse konnte nicht abgeschlossen werden. "
+        "Prüfen Sie, ob Ollama und das VLM-Modell verfügbar sind."
+    ),
+    "DIFFUSION_FAILED": (
+        "Die KI-Bildgenerierung konnte nicht abgeschlossen werden. "
+        "Prüfen Sie, ob ausreichend GPU-Speicher verfügbar ist."
+    ),
+    "DIFFUSION_INPUT_MISSING": ("Für diesen Diffusionsmodus wird ein Eingabebild benötigt."),
+    "DIFFUSION_NOT_FOUND": "Das generierte Diffusionsbild wurde nicht gefunden.",
 }
 
 

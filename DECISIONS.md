@@ -40,6 +40,11 @@ Cuándo y bajo qué condiciones debería revisarse esta decisión.
 ## Registro de decisiones
 <!-- Las más recientes primero -->
 
+### ADR-0016 — Pipeline de difusión: SD 1.5, ControlNet e InstructPix2Pix
+**Fecha:** 2026-04-22
+**Estado:** aceptada
+**Documento:** docs/decisions/0016-diffusion-sd15-controlnet-pix2pix.md
+
 ### ADR-0015 — Cierre v1.0: estado de decisiones acumuladas
 **Fecha:** 2026-04-21
 **Estado:** aceptada

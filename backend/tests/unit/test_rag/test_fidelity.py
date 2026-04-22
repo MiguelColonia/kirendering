@@ -119,9 +119,7 @@ async def test_retriever_preserves_chunk_text() -> None:
     mock_ollama = AsyncMock()
     mock_ollama.embed.return_value = [[0.0] * 768]
     mock_qdrant = AsyncMock()
-    mock_qdrant.search.return_value = [
-        _make_scored_point("uuid-1", 0.88, text=expected_text)
-    ]
+    mock_qdrant.search.return_value = [_make_scored_point("uuid-1", 0.88, text=expected_text)]
 
     results = await retrieve(
         query="Primärenergiebedarf",
@@ -390,15 +388,17 @@ async def test_design_request_not_routed_to_regulation_node(
             "created_at": "2026-04-21T10:00:00Z",
             "message": {
                 "role": "assistant",
-                "content": json.dumps({
-                    "solar_width_m": None,
-                    "solar_height_m": None,
-                    "num_floors": 1,
-                    "floor_height_m": 3.0,
-                    "typology_entries": [],
-                    "is_complete": False,
-                    "clarification_needed_de": "Bitte geben Sie die Grundstücksmaße an.",
-                }),
+                "content": json.dumps(
+                    {
+                        "solar_width_m": None,
+                        "solar_height_m": None,
+                        "num_floors": 1,
+                        "floor_height_m": 3.0,
+                        "typology_entries": [],
+                        "is_complete": False,
+                        "clarification_needed_de": "Bitte geben Sie die Grundstücksmaße an.",
+                    }
+                ),
             },
             "done": True,
         }
@@ -421,8 +421,11 @@ async def test_design_request_not_routed_to_regulation_node(
     chat_requests = [r for r in state.requests if "messages" in r]
     # El primer request al LLM debe tener el system prompt de extracción (no de normativa)
     first_system = next(
-        (msg["content"] for msg in chat_requests[0].get("messages", [])
-         if msg.get("role") == "system"),
+        (
+            msg["content"]
+            for msg in chat_requests[0].get("messages", [])
+            if msg.get("role") == "system"
+        ),
         "",
     )
     assert "JSON" in first_system  # _EXTRACT_SYSTEM siempre pide JSON

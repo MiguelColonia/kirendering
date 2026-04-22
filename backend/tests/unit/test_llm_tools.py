@@ -100,9 +100,7 @@ def test_solve_distribution_returns_solve_result(
     assert isinstance(result, SolveResult)
 
 
-def test_solve_distribution_feasible(
-    solar_rectangular: Solar, program_3_t2: Program
-) -> None:
+def test_solve_distribution_feasible(solar_rectangular: Solar, program_3_t2: Program) -> None:
     """Con solar 20×30 m y 3 T2, el solver debe encontrar solución."""
     result = solve_distribution(solar_rectangular, program_3_t2, timeout_seconds=30)
     assert result.status in (SolutionStatus.OPTIMAL, SolutionStatus.FEASIBLE)
@@ -158,9 +156,7 @@ def test_validate_feasibility_returns_report(
     assert isinstance(report, FeasibilityReport)
 
 
-def test_validate_feasibility_ok_case(
-    solar_rectangular: Solar, program_3_t2: Program
-) -> None:
+def test_validate_feasibility_ok_case(solar_rectangular: Solar, program_3_t2: Program) -> None:
     """Solar 20×30 m con 3 T2 en 1 planta es viable."""
     report = validate_program_feasibility(solar_rectangular, program_3_t2)
     assert report.is_feasible is True

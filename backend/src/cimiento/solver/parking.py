@@ -218,9 +218,7 @@ def _solve_parking_internal(
         if best_layout.total_spaces >= required_spaces
         else SolutionStatus.FEASIBLE
     )
-    message = (
-        f"Capacidad generada: {best_layout.total_spaces} plazas; exigidas: {required_spaces}."
-    )
+    message = f"Capacidad generada: {best_layout.total_spaces} plazas; exigidas: {required_spaces}."
 
     return ParkingSolution(
         status=status,
@@ -687,8 +685,5 @@ def _rectangles_overlap(a: Rectangle, b: Rectangle) -> bool:
     a_top = a.y + a.height
     b_top = b.y + b.height
     return not (
-        a_right <= b.x + _EPS
-        or b_right <= a.x + _EPS
-        or a_top <= b.y + _EPS
-        or b_top <= a.y + _EPS
+        a_right <= b.x + _EPS or b_right <= a.x + _EPS or a_top <= b.y + _EPS or b_top <= a.y + _EPS
     )

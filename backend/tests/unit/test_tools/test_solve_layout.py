@@ -20,10 +20,14 @@ from cimiento.schemas.solution import SolutionStatus
 def solar_20x30() -> Solar:
     return Solar(
         id="s1",
-        contour=Polygon2D(points=[
-            Point2D(x=0, y=0), Point2D(x=20, y=0),
-            Point2D(x=20, y=30), Point2D(x=0, y=30),
-        ]),
+        contour=Polygon2D(
+            points=[
+                Point2D(x=0, y=0),
+                Point2D(x=20, y=0),
+                Point2D(x=20, y=30),
+                Point2D(x=0, y=30),
+            ]
+        ),
         north_angle_deg=0.0,
         max_buildable_height_m=9.0,
     )
@@ -32,8 +36,12 @@ def solar_20x30() -> Solar:
 @pytest.fixture
 def typology_t2() -> Typology:
     return Typology(
-        id="T2", name="T2", min_useful_area=70.0, max_useful_area=90.0,
-        num_bedrooms=2, num_bathrooms=1,
+        id="T2",
+        name="T2",
+        min_useful_area=70.0,
+        max_useful_area=90.0,
+        num_bedrooms=2,
+        num_bathrooms=1,
         rooms=[Room(type=RoomType.LIVING, min_area=20.0, min_short_side=3.5)],
     )
 
@@ -42,7 +50,9 @@ def test_solve_layout_returns_output(solar_20x30: Solar, typology_t2: Typology) 
     input_ = SolveLayoutInput(
         solar=solar_20x30,
         program=Program(
-            project_id="p1", num_floors=1, floor_height_m=3.0,
+            project_id="p1",
+            num_floors=1,
+            floor_height_m=3.0,
             typologies=[typology_t2],
             mix=[TypologyMix(typology_id="T2", count=2)],
         ),
@@ -55,7 +65,9 @@ def test_solve_layout_feasible(solar_20x30: Solar, typology_t2: Typology) -> Non
     input_ = SolveLayoutInput(
         solar=solar_20x30,
         program=Program(
-            project_id="p1", num_floors=1, floor_height_m=3.0,
+            project_id="p1",
+            num_floors=1,
+            floor_height_m=3.0,
             typologies=[typology_t2],
             mix=[TypologyMix(typology_id="T2", count=2)],
         ),
@@ -71,7 +83,9 @@ def test_solve_layout_solution_embedded(solar_20x30: Solar, typology_t2: Typolog
     input_ = SolveLayoutInput(
         solar=solar_20x30,
         program=Program(
-            project_id="p1", num_floors=1, floor_height_m=3.0,
+            project_id="p1",
+            num_floors=1,
+            floor_height_m=3.0,
             typologies=[typology_t2],
             mix=[TypologyMix(typology_id="T2", count=2)],
         ),
@@ -85,17 +99,23 @@ def test_solve_layout_solution_embedded(solar_20x30: Solar, typology_t2: Typolog
 def test_solve_layout_infeasible_tiny_solar(typology_t2: Typology) -> None:
     tiny = Solar(
         id="tiny",
-        contour=Polygon2D(points=[
-            Point2D(x=0, y=0), Point2D(x=5, y=0),
-            Point2D(x=5, y=5), Point2D(x=0, y=5),
-        ]),
+        contour=Polygon2D(
+            points=[
+                Point2D(x=0, y=0),
+                Point2D(x=5, y=0),
+                Point2D(x=5, y=5),
+                Point2D(x=0, y=5),
+            ]
+        ),
         north_angle_deg=0.0,
         max_buildable_height_m=9.0,
     )
     input_ = SolveLayoutInput(
         solar=tiny,
         program=Program(
-            project_id="p2", num_floors=1, floor_height_m=3.0,
+            project_id="p2",
+            num_floors=1,
+            floor_height_m=3.0,
             typologies=[typology_t2],
             mix=[TypologyMix(typology_id="T2", count=1)],
         ),

@@ -20,7 +20,7 @@ from cimiento.api.schemas import JobStartResponse, RenderCreateRequest, RenderGa
 from cimiento.persistence.models import GeneratedOutput, ProjectVersion
 from cimiento.persistence.repository import ProjectRepository
 from cimiento.render import run_render
-from cimiento.schemas.render import RenderConfig, RenderResult, RenderView
+from cimiento.schemas.render import RenderConfig, RenderView
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,10 @@ def _estimate_render_duration_seconds(
     return max(30, int(round(estimated)))
 
 
-def _select_render_view(views: Sequence[RenderView], requested_view: RenderViewType) -> RenderView | None:
+def _select_render_view(
+    views: Sequence[RenderView],
+    requested_view: RenderViewType,
+) -> RenderView | None:
     preferred_prefixes = ("exterior_", "aerial") if requested_view == "exterior" else ("interior_",)
     for prefix in preferred_prefixes:
         for view in views:
@@ -100,7 +103,11 @@ async def _save_reference_image(
     if content_type and not content_type.startswith("image/"):
         raise api_error(status.HTTP_400_BAD_REQUEST, "UNSUPPORTED_REFERENCE_IMAGE")
 
-    payload = reference_image_base64.split(",", 1)[1] if reference_image_base64.startswith("data:") else reference_image_base64
+    payload = (
+        reference_image_base64.split(",", 1)[1]
+        if reference_image_base64.startswith("data:")
+        else reference_image_base64
+    )
     try:
         image_bytes = base64.b64decode(payload, validate=True)
     except ValueError as exc:
@@ -164,7 +171,9 @@ async def _run_render_job(
             )
             return
 
-        render_output_dir = output_root / project_id / f"v{version.version_number}" / "renders" / job_id
+        render_output_dir = (
+            output_root / project_id / f"v{version.version_number}" / "renders" / job_id
+        )
         render_output_dir.mkdir(parents=True, exist_ok=True)
 
         await job_manager.publish(

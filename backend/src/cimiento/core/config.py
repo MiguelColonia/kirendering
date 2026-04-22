@@ -1,4 +1,5 @@
 """Configuración central de Cimiento."""
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -35,6 +36,16 @@ class Settings(BaseSettings):
     render_width: int = 2048
     render_height: int = 1152
     render_timeout_seconds: int = 600
+
+    # Diffusion (SD 1.5 + ControlNet + InstructPix2Pix)
+    sd_base_model: str = "runwayml/stable-diffusion-v1-5"
+    sd_controlnet_depth_model: str = "lllyasviel/sd-controlnet-depth"
+    sd_controlnet_canny_model: str = "lllyasviel/sd-controlnet-canny"
+    sd_instruct_pix2pix_model: str = "timbrooks/instruct-pix2pix"
+    sd_depth_estimator_model: str = "Intel/dpt-hybrid-midas"
+    diffusion_steps: int = 20
+    diffusion_timeout_seconds: int = 600
+    hf_cache_dir: str | None = None
 
 
 settings = Settings()

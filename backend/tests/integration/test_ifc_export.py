@@ -121,8 +121,7 @@ class TestIfcExport:
         """Las plazas de parking deben exportarse como IfcSpace con PredefinedType=PARKING."""
         model = ifcopenshell.open(str(parking_exported_ifc_path))
         parking_spaces = [
-            s for s in model.by_type("IfcSpace")
-            if getattr(s, "PredefinedType", None) == "PARKING"
+            s for s in model.by_type("IfcSpace") if getattr(s, "PredefinedType", None) == "PARKING"
         ]
         assert parking_spaces, "No se encontraron IfcSpace con PredefinedType=PARKING"
 
@@ -147,12 +146,14 @@ class TestIfcExport:
 
         solar = Solar(
             id="solar-ifc-3f-40x40",
-            contour=Polygon2D(points=[
-                Point2D(x=0.0, y=0.0),
-                Point2D(x=40.0, y=0.0),
-                Point2D(x=40.0, y=40.0),
-                Point2D(x=0.0, y=40.0),
-            ]),
+            contour=Polygon2D(
+                points=[
+                    Point2D(x=0.0, y=0.0),
+                    Point2D(x=40.0, y=0.0),
+                    Point2D(x=40.0, y=40.0),
+                    Point2D(x=0.0, y=40.0),
+                ]
+            ),
             north_angle_deg=0.0,
             max_buildable_height_m=12.0,
         )

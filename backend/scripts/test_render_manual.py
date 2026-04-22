@@ -25,12 +25,8 @@ sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 from cimiento.render.blender_pipeline import run_render
 from cimiento.schemas.render import RenderConfig, RenderDevice
 
-_DEFAULT_IFC = (
-    Path(__file__).parents[1] / "data" / "outputs" / "rectangular_simple.ifc"
-)
-_DEFAULT_OUT = (
-    Path(__file__).parents[1] / "data" / "outputs" / "renders"
-)
+_DEFAULT_IFC = Path(__file__).parents[1] / "data" / "outputs" / "rectangular_simple.ifc"
+_DEFAULT_OUT = Path(__file__).parents[1] / "data" / "outputs" / "renders"
 
 
 def main() -> None:

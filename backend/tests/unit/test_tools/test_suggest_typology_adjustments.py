@@ -1,6 +1,5 @@
 """Tests del tool suggest_typology_adjustments."""
 
-
 from cimiento.llm.tools.suggest_typology_adjustments import (
     AdjustmentResult,
     suggest_typology_adjustments,
@@ -11,12 +10,18 @@ from cimiento.schemas.solution import Solution, SolutionMetrics, SolutionStatus
 
 def _make_program(count: int = 5, num_floors: int = 1) -> Program:
     typology = Typology(
-        id="T2", name="T2", min_useful_area=70.0, max_useful_area=90.0,
-        num_bedrooms=2, num_bathrooms=1,
+        id="T2",
+        name="T2",
+        min_useful_area=70.0,
+        max_useful_area=90.0,
+        num_bedrooms=2,
+        num_bathrooms=1,
         rooms=[Room(type=RoomType.LIVING, min_area=20.0, min_short_side=3.5)],
     )
     return Program(
-        project_id="p1", num_floors=num_floors, floor_height_m=3.0,
+        project_id="p1",
+        num_floors=num_floors,
+        floor_height_m=3.0,
         typologies=[typology],
         mix=[TypologyMix(typology_id="T2", count=count)],
     )
@@ -87,8 +92,7 @@ def test_suggest_timeout_proposes_floor_addition() -> None:
     solution = _make_solution(SolutionStatus.TIMEOUT, placed=3)
     result = suggest_typology_adjustments(program, solution)
     floor_suggestions = [
-        s for s in result.suggestions
-        if s.adjusted_program.num_floors > program.num_floors
+        s for s in result.suggestions if s.adjusted_program.num_floors > program.num_floors
     ]
     assert len(floor_suggestions) > 0
 
