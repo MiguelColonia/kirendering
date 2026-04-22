@@ -89,7 +89,7 @@
     "trigger": "Neues Projekt",
     "eyebrow": "Projekt anlegen",
     "title": "Neues Projekt erstellen",
-    "description": "Legen Sie zunächst nur Name und Beschreibung an. Cimiento ergänzt einen belastbaren Startdatensatz, damit der Editor im nächsten Schritt direkt arbeiten kann.",
+    "description": "Legen Sie Name, Grundstück und Wohnprogramm direkt an. Der erste Projektsnapshot wird genau mit diesen Eingaben versioniert.",
     "fields": {
       "name": "Projektname",
       "description": "Beschreibung"
@@ -111,6 +111,10 @@
     "back_to_list": "Zur Projektliste",
     "description_fallback": "Noch keine Projektbeschreibung hinterlegt.",
     "render_gallery": "Render öffnen",
+    "delete_project": "Projekt löschen",
+    "delete_pending": "Projekt wird gelöscht…",
+    "delete_confirm": "Soll das Projekt „{{name}}“ wirklich gelöscht werden? Dieser Schritt kann nicht rückgängig gemacht werden.",
+    "delete_error": "Das Projekt konnte nicht gelöscht werden.",
     "version_label": "Version {{count}}",
     "meta": {
       "created_at": "Erstellt am",
@@ -119,8 +123,9 @@
       "units": "Wohneinheiten"
     },
     "workspace_title": "Projektarbeitsbereich",
-    "workspace_description": "Bearbeiten Sie das Wohnprogramm dieser Projektversion oder prüfen Sie ein generiertes IFC-Modell in derselben Oberfläche.",
+    "workspace_description": "Bearbeiten Sie Grundstück und Wohnprogramm, prüfen Sie das generierte IFC-Modell und nutzen Sie den KI-Assistenten in derselben Oberfläche.",
     "tabs": {
+      "site": "Grundstück",
       "program": "Programm",
       "model": "Modell"
     }
@@ -130,7 +135,20 @@
     "description": "Bearbeiten Sie das Grundstück als Polygon direkt im Canvas. Die Eckpunkte lassen sich ziehen.",
     "area": "Grundstücksfläche",
     "vertices": "Eckpunkte",
+    "max_height": "Maximale Gebäudehöhe in m",
+    "point_add": "Punkt hinzufügen",
+    "point_remove": "Letzten Punkt entfernen",
+    "zoom_reset": "Zoom zurücksetzen",
+    "grid_snap": "Rasterfang",
+    "north_label": "Nordausrichtung",
+    "osm_import": "OSM-Import",
+    "osm_todo": "Der Import aus OpenStreetMap folgt in einer späteren Ausbaustufe.",
+    "save_success": "Das Grundstück wurde als neue Projektversion gespeichert.",
+    "save_error": "Das Grundstück konnte nicht gespeichert werden.",
+    "save_invalid": "Das Grundstück ist noch nicht gültig. Prüfen Sie Eckpunkte, Fläche und Selbstüberschneidungen.",
     "validation": {
+      "too_few_points": "Mindestens drei Eckpunkte sind erforderlich.",
+      "self_intersecting": "Das Grundstückspolygon darf sich nicht selbst schneiden.",
       "polygon_too_small": "Das Grundstückspolygon ist zu klein.",
       "polygon_ok": "Das Grundstück ist für einen frühen Entwurf plausibel."
     }
@@ -404,7 +422,8 @@
       "title": "Downloads",
       "ifc": "IFC herunterladen",
       "dxf": "DXF herunterladen",
-      "xlsx": "XLSX herunterladen"
+      "xlsx": "XLSX herunterladen",
+      "svg": "SVG herunterladen"
     },
     "categories": {
       "IFCPROJECT": "Projekt",
@@ -500,7 +519,10 @@
     },
     "processing": {
       "title": "Generierung läuft…",
-      "description": "Das Diffusionsmodell verarbeitet das Bild. Je nach GPU-Kapazität kann das einige Minuten dauern. Bitte schließen Sie das Fenster nicht."
+      "description": "Das Diffusionsmodell verarbeitet das Bild. Je nach GPU-Kapazität kann das einige Minuten dauern. Bitte schließen Sie das Fenster nicht.",
+      "job": "Auftrag",
+      "status": "Status",
+      "connection": "Live-Verbindung"
     },
     "done": {
       "title": "Generierung abgeschlossen",

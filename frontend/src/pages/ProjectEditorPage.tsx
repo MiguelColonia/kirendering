@@ -1,12 +1,16 @@
 import { lazy, Suspense, useState } from "react";
-import { ArrowLeft, ScanLine } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, ScanLine, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { deleteProject } from "../api/projects";
 import { PageHeader } from "../components/PageHeader";
 import { StatusBadge } from "../components/StatusBadge";
+import { ChatPanel } from "../features/chat/ChatPanel";
 import { ProjectGenerationPanel } from "../features/generation/ProjectGenerationPanel";
 import { PlanAnalyzerDialog } from "../features/plan-analyzer/PlanAnalyzerDialog";
 import { ProjectProgramEditor } from "../features/program-editor/ProjectProgramEditor";
+import { ProjectSolarEditor } from "../features/solar-editor/ProjectSolarEditor";
 import { useProjectDetailQuery } from "../features/projects/useProjectsQuery";
 import { formatDate } from "../utils/format";
 
@@ -28,21 +32,51 @@ function statusTone(status: string): "neutral" | "good" | "warn" | "accent" {
 
 export function ProjectEditorPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { id } = useParams();
   const projectQuery = useProjectDetailQuery(id);
-  const [activeTab, setActiveTab] = useState<"program" | "model">("program");
+  const [activeTab, setActiveTab] = useState<"site" | "program" | "model">(
+    "site",
+  );
   const [analyzerOpen, setAnalyzerOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const project = projectQuery.data;
   const outputs = project?.current_version?.generated_outputs ?? [];
   const hasIfcOutput = outputs.some((output) => output.output_type === "IFC");
   const visibleTab =
-    activeTab === "model" && !hasIfcOutput ? "program" : activeTab;
+    activeTab === "model" && !hasIfcOutput ? "site" : activeTab;
   const totalUnits =
     project?.current_version?.program.mix.reduce(
       (total, entry) => total + entry.count,
       0,
     ) ?? 0;
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!project) {
+        throw new Error(t("project_editor.delete_error"));
+      }
+
+      await deleteProject(project.id);
+    },
+    onMutate: () => {
+      setDeleteError(null);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.removeQueries({ queryKey: ["project", project?.id] });
+      navigate("/projekte");
+    },
+    onError: (error) => {
+      setDeleteError(
+        error instanceof Error
+          ? error.message
+          : t("project_editor.delete_error"),
+      );
+    },
+  });
 
   if (projectQuery.isLoading) {
     return (
@@ -96,6 +130,27 @@ export function ProjectEditorPage() {
                 >
                   {t("project_editor.render_gallery")}
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        t("project_editor.delete_confirm", {
+                          name: project.name,
+                        }),
+                      )
+                    ) {
+                      deleteMutation.mutate();
+                    }
+                  }}
+                  disabled={deleteMutation.isPending}
+                  className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Trash2 size={16} />
+                  {deleteMutation.isPending
+                    ? t("project_editor.delete_pending")
+                    : t("project_editor.delete_project")}
+                </button>
                 <Link
                   to="/projekte"
                   className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-line)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--color-ink)]"
@@ -107,6 +162,12 @@ export function ProjectEditorPage() {
             }
           />
         </section>
+
+        {deleteError ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+            {deleteError}
+          </div>
+        ) : null}
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
           <section className="panel-surface rounded-[2rem] p-6">
@@ -170,6 +231,19 @@ export function ProjectEditorPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 type="button"
+                onClick={() => setActiveTab("site")}
+                className={[
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition",
+                  visibleTab === "site"
+                    ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent-soft)] text-[color:var(--color-accent)]"
+                    : "border-[color:var(--color-line)] bg-white/70 text-[color:var(--color-mist)]",
+                ].join(" ")}
+              >
+                {t("project_editor.tabs.site")}
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setActiveTab("program")}
                 className={[
                   "rounded-full border px-4 py-2 text-sm font-semibold transition",
@@ -209,6 +283,10 @@ export function ProjectEditorPage() {
 
         <ProjectGenerationPanel key={project.id} projectId={project.id} />
 
+        {visibleTab === "site" ? (
+          <ProjectSolarEditor project={project} />
+        ) : null}
+
         {visibleTab === "program" ? (
           <ProjectProgramEditor project={project} />
         ) : null}
@@ -225,6 +303,8 @@ export function ProjectEditorPage() {
             <IfcModelWorkspace outputs={outputs} project={project} />
           </Suspense>
         ) : null}
+
+        <ChatPanel projectId={project.id} />
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Circle, Layer, Line, Stage, Text } from "react-konva";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -77,6 +77,7 @@ export function SolarEditorCanvas({
   onNorthAngleChange,
 }: SolarEditorCanvasProps) {
   const { t } = useTranslation();
+  const [snapStep, setSnapStep] = useState(gridStep);
   const [zoom, setZoom] = useState(1.0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [hoverCanvas, setHoverCanvas] = useState<{
@@ -84,6 +85,10 @@ export function SolarEditorCanvas({
     y: number;
   } | null>(null);
   const stageRef = useRef<import("konva/lib/Stage").Stage | null>(null);
+
+  useEffect(() => {
+    setSnapStep(gridStep);
+  }, [gridStep]);
 
   // --- Koordinatentransform ---
   const allPoints =
@@ -116,13 +121,13 @@ export function SolarEditorCanvas({
   const visYMin = worldCy - CANVAS_H / 2 / scale;
   const visYMax = worldCy + CANVAS_H / 2 / scale;
 
-  const xStart = Math.floor(visXMin / gridStep) * gridStep;
-  for (let wx = xStart; wx <= visXMax; wx += gridStep) {
+  const xStart = Math.floor(visXMin / snapStep) * snapStep;
+  for (let wx = xStart; wx <= visXMax; wx += snapStep) {
     const cx = toCanvas({ x: wx, y: 0 }).x;
     gridLines.push([cx, 0, cx, CANVAS_H]);
   }
-  const yStart = Math.floor(visYMin / gridStep) * gridStep;
-  for (let wy = yStart; wy <= visYMax; wy += gridStep) {
+  const yStart = Math.floor(visYMin / snapStep) * snapStep;
+  for (let wy = yStart; wy <= visYMax; wy += snapStep) {
     const cy = toCanvas({ x: 0, y: wy }).y;
     gridLines.push([0, cy, CANVAS_W, cy]);
   }
@@ -154,7 +159,7 @@ export function SolarEditorCanvas({
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
     const world = fromCanvas(pos.x, pos.y);
-    const snapped = snapToGrid(world, gridStep);
+    const snapped = snapToGrid(world, snapStep);
     onChange([...points, snapped]);
   };
 
@@ -170,7 +175,7 @@ export function SolarEditorCanvas({
       clamp(e.target.x(), PADDING / 2, CANVAS_W - PADDING / 2),
       clamp(e.target.y(), PADDING / 2, CANVAS_H - PADDING / 2),
     );
-    const snapped = snapToGrid(raw, gridStep);
+    const snapped = snapToGrid(raw, snapStep);
     const next = [...points];
     next[index] = snapped;
     onChange(next);
@@ -178,7 +183,7 @@ export function SolarEditorCanvas({
 
   // Snapped hover-Punkt für Cursor-Vorschau
   const hoverSnapped = hoverCanvas
-    ? snapToGrid(fromCanvas(hoverCanvas.x, hoverCanvas.y), gridStep)
+    ? snapToGrid(fromCanvas(hoverCanvas.x, hoverCanvas.y), snapStep)
     : null;
   const hoverC = hoverSnapped ? toCanvas(hoverSnapped) : null;
 
@@ -216,8 +221,8 @@ export function SolarEditorCanvas({
             if (points.length === 0) return;
             const last = points[points.length - 1];
             const next = snapToGrid(
-              { x: last.x + gridStep, y: last.y },
-              gridStep,
+              { x: last.x + snapStep, y: last.y },
+              snapStep,
             );
             onChange([...points, next]);
           }}
@@ -430,12 +435,13 @@ export function SolarEditorCanvas({
                 <button
                   key={step}
                   type="button"
-                  onClick={() =>
-                    onChange(points.map((p) => snapToGrid(p, step)))
-                  }
+                  onClick={() => {
+                    setSnapStep(step);
+                    onChange(points.map((p) => snapToGrid(p, step)));
+                  }}
                   className={[
                     "rounded-full border px-3 py-1 text-xs font-semibold transition",
-                    gridStep === step
+                    snapStep === step
                       ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent-soft)] text-[color:var(--color-accent)]"
                       : "border-[color:var(--color-line)] bg-white/70 text-[color:var(--color-mist)]",
                   ].join(" ")}

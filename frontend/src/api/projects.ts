@@ -3,10 +3,12 @@ import type {
   CreateRenderPayload,
   JobStartResponse,
   JobStatus,
+  Program,
   ProjectDetail,
   ProjectPayload,
   ProjectSummary,
   RenderGalleryItem,
+  Solar,
 } from "../types/project";
 
 export async function listProjects(): Promise<ProjectSummary[]> {
@@ -38,6 +40,28 @@ export async function updateProject(
   const response = await apiClient.put<ProjectDetail>(
     `/api/projects/${projectId}`,
     payload,
+  );
+  return response.data;
+}
+
+export async function patchProjectProgram(
+  projectId: string,
+  program: Program,
+): Promise<ProjectDetail> {
+  const response = await apiClient.patch<ProjectDetail>(
+    `/api/projects/${projectId}/program`,
+    { program },
+  );
+  return response.data;
+}
+
+export async function patchProjectSolar(
+  projectId: string,
+  solar: Solar,
+): Promise<ProjectDetail> {
+  const response = await apiClient.patch<ProjectDetail>(
+    `/api/projects/${projectId}/solar`,
+    { solar },
   );
   return response.data;
 }

@@ -1,10 +1,24 @@
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, FileImage, Loader2, Sparkles, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { createDiffusion } from "../../api/diffusion";
+import {
+  useJobStream,
+  type JobStreamCloseReason,
+  type JobStreamError,
+} from "../../hooks/useJobStream";
 import type { DiffusionMode } from "../../types/diffusion";
 
 type Phase = "compose" | "processing" | "done" | "error";
+type JobStatus = "idle" | "queued" | "running" | "finished" | "failed";
+type ConnectionStatus =
+  | "idle"
+  | "connecting"
+  | "connected"
+  | "reconnecting"
+  | "closed"
+  | "error";
 
 type Props = {
   projectId: string;
@@ -30,8 +44,13 @@ const MODES: { value: DiffusionMode; labelKey: string; descKey: string }[] = [
   },
 ];
 
-export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }: Props) {
+export function DiffusionComposerDialog({
+  projectId,
+  onClose,
+  initialImageUrl,
+}: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [phase, setPhase] = useState<Phase>("compose");
@@ -53,7 +72,49 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
   const [prompt, setPrompt] = useState("");
   const [negativePrompt, setNegativePrompt] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
+  const [jobStatus, setJobStatus] = useState<JobStatus>("idle");
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionStatus>("idle");
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useJobStream(jobId, {
+    onEvent: (event) => {
+      if (event.event === "finished") {
+        setJobStatus("finished");
+        setConnectionError(null);
+        void queryClient.invalidateQueries({
+          queryKey: ["diffusion", projectId],
+        });
+        setPhase("done");
+        return;
+      }
+
+      if (event.event === "failed") {
+        setJobStatus("failed");
+        setError(t("diffusion.error.generic"));
+        setPhase("error");
+        return;
+      }
+
+      setJobStatus("running");
+    },
+    onOpen: () => {
+      setConnectionStatus("connected");
+      setConnectionError(null);
+    },
+    onReconnect: () => {
+      setConnectionStatus("reconnecting");
+      setConnectionError(t("generation.connection_lost"));
+    },
+    onSocketError: (jobError: JobStreamError) => {
+      setConnectionStatus("error");
+      setConnectionError(jobError.message);
+    },
+    onClose: (reason: JobStreamCloseReason) => {
+      setConnectionStatus(reason === "completed" ? "closed" : "error");
+    },
+  });
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0] ?? null;
@@ -66,6 +127,8 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
     if (!file || !prompt.trim()) return;
     setPhase("processing");
     setError(null);
+    setConnectionStatus("connecting");
+    setConnectionError(null);
     try {
       const result = await createDiffusion(projectId, file, {
         mode,
@@ -73,9 +136,10 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
         negative_prompt: negativePrompt.trim() || undefined,
       });
       setJobId(result.job_id);
-      setPhase("done");
+      setJobStatus(result.status === "queued" ? "queued" : "running");
     } catch {
       setError(t("diffusion.error.generic"));
+      setConnectionStatus("error");
       setPhase("error");
     }
   }
@@ -84,9 +148,15 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
     setPhase("compose");
     setError(null);
     setJobId(null);
+    setJobStatus("idle");
+    setConnectionStatus("idle");
+    setConnectionError(null);
   }
 
   const canSubmit = file !== null && prompt.trim().length > 0;
+  const visibleConnectionStatus =
+    connectionStatus === "idle" ? "connecting" : connectionStatus;
+  const visibleJobStatus = jobStatus === "idle" ? "queued" : jobStatus;
 
   return (
     <div
@@ -161,7 +231,10 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
                     className="max-h-48 rounded-xl object-contain"
                   />
                 ) : (
-                  <FileImage size={40} className="text-[color:var(--color-mist)]" />
+                  <FileImage
+                    size={40}
+                    className="text-[color:var(--color-mist)]"
+                  />
                 )}
                 <p className="text-sm font-semibold text-[color:var(--color-ink)]">
                   {file ? file.name : t("diffusion.compose.upload_action")}
@@ -202,7 +275,9 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
                     type="text"
                     value={negativePrompt}
                     onChange={(e) => setNegativePrompt(e.target.value)}
-                    placeholder={t("diffusion.compose.negative_prompt_placeholder")}
+                    placeholder={t(
+                      "diffusion.compose.negative_prompt_placeholder",
+                    )}
                     className="w-full rounded-[1rem] border border-[color:var(--color-line)] bg-white/80 px-4 py-3 text-sm text-[color:var(--color-ink)] placeholder-[color:var(--color-mist)] focus:border-[color:var(--color-accent)] focus:outline-none"
                   />
                 </div>
@@ -210,7 +285,10 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
 
               {/* Hardware notice */}
               <div className="flex items-start gap-2 rounded-[1rem] border border-blue-100 bg-blue-50 p-4">
-                <AlertTriangle size={16} className="mt-0.5 shrink-0 text-blue-500" />
+                <AlertTriangle
+                  size={16}
+                  className="mt-0.5 shrink-0 text-blue-500"
+                />
                 <p className="text-xs leading-6 text-blue-700">
                   {t("diffusion.compose.hardware_notice")}
                 </p>
@@ -229,7 +307,10 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
 
           {phase === "processing" && (
             <div className="flex flex-col items-center gap-6 py-12">
-              <Loader2 size={48} className="animate-spin text-[color:var(--color-accent)]" />
+              <Loader2
+                size={48}
+                className="animate-spin text-[color:var(--color-accent)]"
+              />
               <div className="text-center">
                 <p className="text-lg font-semibold tracking-[-0.03em] text-[color:var(--color-ink)]">
                   {t("diffusion.processing.title")}
@@ -238,12 +319,44 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
                   {t("diffusion.processing.description")}
                 </p>
               </div>
+
+              <div className="w-full max-w-md space-y-3 rounded-[1.5rem] border border-[color:var(--color-line)] bg-white/80 p-5 text-sm text-[color:var(--color-ink)]">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-semibold text-[color:var(--color-mist)]">
+                    {t("diffusion.processing.job")}
+                  </span>
+                  <span className="font-mono text-xs">{jobId ?? "—"}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-semibold text-[color:var(--color-mist)]">
+                    {t("diffusion.processing.status")}
+                  </span>
+                  <span>{t(`renders.status.${visibleJobStatus}`)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-semibold text-[color:var(--color-mist)]">
+                    {t("diffusion.processing.connection")}
+                  </span>
+                  <span>
+                    {t(`generation.connection.${visibleConnectionStatus}`)}
+                  </span>
+                </div>
+              </div>
+
+              {connectionError ? (
+                <div className="w-full max-w-md rounded-[1rem] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+                  {connectionError}
+                </div>
+              ) : null}
             </div>
           )}
 
           {phase === "done" && (
             <div className="flex flex-col items-center gap-6 py-8">
-              <Sparkles size={48} className="text-[color:var(--color-accent)]" />
+              <Sparkles
+                size={48}
+                className="text-[color:var(--color-accent)]"
+              />
               <div className="text-center">
                 <p className="text-lg font-semibold tracking-[-0.03em] text-[color:var(--color-ink)]">
                   {t("diffusion.done.title")}
@@ -275,7 +388,9 @@ export function DiffusionComposerDialog({ projectId, onClose, initialImageUrl }:
                   {t("diffusion.error.title")}
                 </p>
                 {error && (
-                  <p className="mt-2 max-w-sm text-sm text-[color:var(--color-mist)]">{error}</p>
+                  <p className="mt-2 max-w-sm text-sm text-[color:var(--color-mist)]">
+                    {error}
+                  </p>
                 )}
               </div>
 

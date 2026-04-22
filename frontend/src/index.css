@@ -12,7 +12,7 @@
   --color-teal-soft: rgba(34, 91, 85, 0.1);
   --color-clay: #b86a42;
   --color-clay-soft: rgba(184, 106, 66, 0.1);
-  --shadow-panel: 0 24px 70px rgba(28, 39, 49, 0.08);
+  --shadow-panel: 0 26px 80px rgba(28, 39, 49, 0.09);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -22,6 +22,8 @@
 @layer base {
   html {
     background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.34), transparent 36%),
+      radial-gradient(circle at 14% 10%, rgba(184, 106, 66, 0.12), transparent 22%),
       radial-gradient(circle at top left, rgba(24, 78, 99, 0.1), transparent 32%),
       radial-gradient(circle at bottom right, rgba(34, 91, 85, 0.12), transparent 28%),
       var(--color-sand);
@@ -33,7 +35,15 @@
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
-    background: transparent;
+    background:
+      radial-gradient(circle at 78% 18%, rgba(24, 78, 99, 0.05), transparent 18%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+    background-attachment: fixed;
+    color: var(--color-ink);
+  }
+
+  ::selection {
+    background: rgba(24, 78, 99, 0.18);
     color: var(--color-ink);
   }
 
@@ -56,10 +66,10 @@
 
 @layer components {
   .panel-surface {
-    background: rgba(248, 250, 248, 0.92);
-    border: 1px solid var(--color-line);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 248, 0.92));
+    border: 1px solid rgba(24, 36, 45, 0.09);
     box-shadow: var(--shadow-panel);
-    backdrop-filter: blur(18px);
+    backdrop-filter: blur(22px);
   }
 
   .grid-paper {
