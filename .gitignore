@@ -40,6 +40,7 @@ models/ollama/*
 data/outputs/*
 !data/outputs/.gitkeep
 backend/data/outputs/*
+data/qdrant_storage/
 *.db
 *.sqlite
 *.ifc

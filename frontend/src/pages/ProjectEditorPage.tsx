@@ -1,3 +1,21 @@
+/**
+ * ProjectEditorPage — página principal de edición de un proyecto.
+ *
+ * Organiza el workspace del proyecto en tres pestañas:
+ *   site    — editor del solar (SolarEditorCanvas + NorthCompass)
+ *   program — editor del programa de necesidades (tipologías y mix)
+ *   model   — visor IFC 3D (solo visible si existe una salida IFC generada)
+ *
+ * El visor IFC (IfcModelWorkspace) se carga de forma lazy porque incluye el
+ * bundle ``ifc-web-ifc`` (~5 MB WASM) y ``ifc-three`` (Three.js). Cargarlo
+ * en el bundle principal haría la primera carga de cualquier página mucho más lenta.
+ *
+ * La pestaña "model" se fuerza a "site" cuando no hay IFC generado aún,
+ * evitando que el usuario vea un panel vacío si llega por URL directa.
+ *
+ * El panel de generación (ProjectGenerationPanel) y el chat (ChatPanel) son
+ * siempre visibles independientemente de la pestaña activa.
+ */
 import { lazy, Suspense, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ScanLine, Trash2 } from "lucide-react";
@@ -40,6 +58,7 @@ export function ProjectEditorPage() {
     "site",
   );
   const [analyzerOpen, setAnalyzerOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const project = projectQuery.data;
@@ -63,6 +82,7 @@ export function ProjectEditorPage() {
     },
     onMutate: () => {
       setDeleteError(null);
+      setDeleteConfirmOpen(false);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
@@ -130,27 +150,38 @@ export function ProjectEditorPage() {
                 >
                   {t("project_editor.render_gallery")}
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        t("project_editor.delete_confirm", {
-                          name: project.name,
-                        }),
-                      )
-                    ) {
-                      deleteMutation.mutate();
-                    }
-                  }}
-                  disabled={deleteMutation.isPending}
-                  className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <Trash2 size={16} />
-                  {deleteMutation.isPending
-                    ? t("project_editor.delete_pending")
-                    : t("project_editor.delete_project")}
-                </button>
+                {deleteConfirmOpen ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => deleteMutation.mutate()}
+                      disabled={deleteMutation.isPending}
+                      className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Trash2 size={16} />
+                      {deleteMutation.isPending
+                        ? t("project_editor.delete_pending")
+                        : t("project_editor.delete_confirm_action")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteConfirmOpen(false)}
+                      disabled={deleteMutation.isPending}
+                      className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-line)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--color-ink)] disabled:opacity-60"
+                    >
+                      {t("common.cancel")}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setDeleteConfirmOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
+                  >
+                    <Trash2 size={16} />
+                    {t("project_editor.delete_project")}
+                  </button>
+                )}
                 <Link
                   to="/projekte"
                   className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-line)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--color-ink)]"

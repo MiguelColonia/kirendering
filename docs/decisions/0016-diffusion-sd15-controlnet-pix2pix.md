@@ -94,8 +94,8 @@ hf_cache_dir                 = None   (opcional, configurable via .env)
 ### Detección de dispositivo
 
 ```
-1. ¿torch.version.hip is not None?  → cuda (ROCm, RX 6600 con HSA_OVERRIDE_GFX_VERSION=10.3.0)
-2. ¿torch.cuda.is_available()?       → cuda (NVIDIA)
+1. ¿torch.version.hip is not None y torch.cuda.is_available()?  → cuda (ROCm, RX 6600 con HSA_OVERRIDE_GFX_VERSION=10.3.0)
+2. ¿torch.cuda.is_available()?                                  → cuda (NVIDIA)
 3. Fallback                          → cpu (lento, advertencia en warnings)
 ```
 

@@ -1,4 +1,24 @@
-"""Orquestador del pipeline de difusión con caché lazy de modelos."""
+"""
+Orquestador del pipeline de difusión generativa de Cimiento (ADR 0016).
+
+Tres modos de difusión soportados:
+  img2img_controlnet_depth  — SD 1.5 + ControlNet depth (DPT): preserva volumetría.
+  img2img_controlnet_canny  — SD 1.5 + ControlNet canny: preserva bordes y líneas.
+  instruct_pix2pix          — InstructPix2Pix (timbrooks/): edición por instrucción.
+
+Todos los pipelines se cargan de forma lazy la primera vez que se usan y se
+almacenan en ``_LOADED_PIPELINES`` (dict módulo-nivel). Esto permite que el
+servidor arranque aunque ``diffusers``/``torch`` no estén instalados.
+
+Detección de dispositivo:
+    - ROCm (torch.version.hip is not None y torch.cuda.is_available()) → usa
+        ``device="cuda"`` (alias para ROCm).
+  - CUDA → ``device="cuda"`` con dtype float16.
+  - CPU → float32 (rendimiento muy reducido, solo para pruebas).
+
+Invariante: este módulo nunca modifica el IFC ni ningún archivo de entrada.
+Solo genera imágenes derivadas en config.output_dir.
+"""
 
 from __future__ import annotations
 
@@ -18,10 +38,15 @@ _TARGET_SIZE = (512, 512)
 def _detect_device() -> str:
     import torch
 
-    if torch.version.hip is not None:
-        return "cuda"
     if torch.cuda.is_available():
         return "cuda"
+
+    if torch.version.hip is not None:
+        logger.warning(
+            "Build ROCm detectada pero sin GPU disponible; usando CPU para difusión"
+        )
+        return "cpu"
+
     logger.warning("Sin GPU disponible; usando CPU para difusión (rendimiento reducido)")
     return "cpu"
 

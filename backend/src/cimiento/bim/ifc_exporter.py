@@ -1,4 +1,12 @@
 """
+Exportador IFC4 para la jerarquía BIM de Cimiento (capa BIM, ADR 0004).
+
+Convierte un objeto ``Building`` (schema Pydantic de dominio) en un archivo .ifc
+compatible con IFC4. El IFC resultante es el formato canónico del proyecto; DXF,
+XLSX, SVG y renders son derivados de este archivo (nunca al revés).
+
+Archivo abierto y probado con: BlenderBIM, BIMvision, Solibri, FreeCAD, web-ifc.
+
 Exportador IFC4 para la jerarquía BIM de Cimiento.
 
 == Decisiones de diseño ==
@@ -189,11 +197,11 @@ def validate_ifc(path: Path) -> ValidationResult:
     num_transport_elements = len(model.by_type("IfcTransportElement"))
 
     if num_buildings == 0:
-        warnings.append("No se encontró ningún IfcBuilding")
+        warnings.append("Kein IfcBuilding gefunden.")
     if num_storeys == 0:
-        warnings.append("No se encontró ningún IfcBuildingStorey")
+        warnings.append("Kein IfcBuildingStorey gefunden.")
     if num_walls == 0:
-        warnings.append("No se encontró ningún muro IFC")
+        warnings.append("Keine IFC-Wände gefunden.")
 
     return ValidationResult(
         valid=True,

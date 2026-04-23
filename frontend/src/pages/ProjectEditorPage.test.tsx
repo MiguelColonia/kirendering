@@ -10,11 +10,12 @@ import {
   createDefaultSolar,
 } from "../features/projects/projectDefaults";
 
-const { mockUseProjectDetailQuery, mockDeleteProject, mockNavigate } = vi.hoisted(() => ({
-  mockUseProjectDetailQuery: vi.fn(),
-  mockDeleteProject: vi.fn(),
-  mockNavigate: vi.fn(),
-}));
+const { mockUseProjectDetailQuery, mockDeleteProject, mockNavigate } =
+  vi.hoisted(() => ({
+    mockUseProjectDetailQuery: vi.fn(),
+    mockDeleteProject: vi.fn(),
+    mockNavigate: vi.fn(),
+  }));
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -31,9 +32,10 @@ vi.mock("react-i18next", () => ({
 }));
 
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>(
-    "react-router-dom",
-  );
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
 
   return {
     ...actual,
@@ -81,7 +83,9 @@ vi.mock("../features/solar-editor/ProjectSolarEditor", () => ({
 }));
 
 vi.mock("../features/chat/ChatPanel", () => ({
-  ChatPanel: ({ projectId }: { projectId: string }) => <div>chat-panel:{projectId}</div>,
+  ChatPanel: ({ projectId }: { projectId: string }) => (
+    <div>chat-panel:{projectId}</div>
+  ),
 }));
 
 vi.mock("../features/ifc-viewer/IfcModelWorkspace", () => ({
@@ -164,9 +168,13 @@ describe("ProjectEditorPage", () => {
 
     renderPage();
 
-    await user.click(screen.getByRole("button", { name: "plan_analyzer.trigger" }));
+    await user.click(
+      screen.getByRole("button", { name: "plan_analyzer.trigger" }),
+    );
 
-    expect(screen.getByText("plan-analyzer-dialog:project-1")).toBeInTheDocument();
+    expect(
+      screen.getByText("plan-analyzer-dialog:project-1"),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "project_editor.render_gallery" }),
     ).toHaveAttribute("href", "/projekte/project-1/renders");
@@ -174,7 +182,9 @@ describe("ProjectEditorPage", () => {
       screen.getByRole("link", { name: "project_editor.back_to_list" }),
     ).toHaveAttribute("href", "/projekte");
 
-    await user.click(screen.getByRole("button", { name: "close-plan-analyzer" }));
+    await user.click(
+      screen.getByRole("button", { name: "close-plan-analyzer" }),
+    );
 
     expect(
       screen.queryByText("plan-analyzer-dialog:project-1"),
@@ -183,7 +193,6 @@ describe("ProjectEditorPage", () => {
 
   it("borra el proyecto tras confirmar y vuelve a la lista", async () => {
     const user = userEvent.setup();
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
     mockDeleteProject.mockResolvedValue(undefined);
     mockUseProjectDetailQuery.mockReturnValue({
       data: buildProject(true),
@@ -197,6 +206,11 @@ describe("ProjectEditorPage", () => {
     await user.click(
       screen.getByRole("button", { name: "project_editor.delete_project" }),
     );
+    await user.click(
+      screen.getByRole("button", {
+        name: "project_editor.delete_confirm_action",
+      }),
+    );
 
     await waitFor(() => {
       expect(mockDeleteProject).toHaveBeenCalledWith("project-1");
@@ -205,7 +219,6 @@ describe("ProjectEditorPage", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/projekte");
     });
 
-    expect(confirmSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["projects"] });
     expect(removeSpy).toHaveBeenCalledWith({
       queryKey: ["project", "project-1"],
@@ -214,7 +227,6 @@ describe("ProjectEditorPage", () => {
 
   it("muestra el error de borrado si la operación falla", async () => {
     const user = userEvent.setup();
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     mockDeleteProject.mockRejectedValue(new Error("delete failed"));
     mockUseProjectDetailQuery.mockReturnValue({
       data: buildProject(true),
@@ -225,6 +237,11 @@ describe("ProjectEditorPage", () => {
 
     await user.click(
       screen.getByRole("button", { name: "project_editor.delete_project" }),
+    );
+    await user.click(
+      screen.getByRole("button", {
+        name: "project_editor.delete_confirm_action",
+      }),
     );
 
     expect(await screen.findByText("delete failed")).toBeInTheDocument();

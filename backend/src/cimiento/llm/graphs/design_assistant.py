@@ -1,5 +1,5 @@
 """
-Grafo de agentes para el copiloto de anteproyecto residencial.
+Grafo de agentes LangGraph para el copiloto de anteproyecto residencial (ADR 0009).
 
 Implementa un StateGraph de LangGraph con cinco nodos:
 
@@ -7,9 +7,19 @@ Implementa un StateGraph de LangGraph con cinco nodos:
                                            ↘                ↘
                                           (errores → END)    handle_infeasible → END
 
+  START también puede enrutar directamente a answer_with_regulation si el mensaje
+  es una consulta normativa directa (contiene §, GEG, MBO, BauNVO, etc.).
+
 Principio fundamental (CLAUDE.md §3): el LLM nunca resuelve geometría.
 Solo extrae intención del usuario, valida contra normativa y comunica resultados.
 La geometría y la optimización son responsabilidad exclusiva del solver CP-SAT.
+
+Modelos usados por nodo (ADR 0008, ADR 0009):
+  extract_requirements  → qwen2.5:7b-instruct  (rol "extractor", rápido, JSON)
+  validate_normative    → qwen2.5:14b-instruct (rol "normative", razonamiento)
+  answer_with_regulation→ qwen2.5:14b-instruct (rol "normative", RAG + citas)
+  interpret_result      → qwen2.5:7b-instruct  (rol "chat", descripción)
+  handle_infeasible     → (sin LLM) suggest_typology_adjustments determinista
 """
 
 from __future__ import annotations

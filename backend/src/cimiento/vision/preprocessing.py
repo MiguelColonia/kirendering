@@ -1,4 +1,22 @@
-"""Preprocesado OpenCV para limpiar y vectorizar planos antes del VLM."""
+"""
+Preprocesado OpenCV para limpiar y vectorizar planos arquitectónicos antes del VLM.
+
+Responsabilidades de este módulo (capa Visión, ADR 0012):
+  1. Carga y normalización de la imagen (``load_and_normalize``).
+     Corrige perspectiva si detecta un documento fotográfico (cuadrilátero > 18% del área).
+  2. Binarización adaptativa (``binarize``) con threshold gaussiano para tolerar
+     variaciones de iluminación en fotografías de planos impresos.
+  3. Detección de segmentos de muro con HoughLinesP (``detect_lines``).
+     Los parámetros por defecto están calibrados para planos A1/A2 escaneados a 150-300 dpi.
+  4. Detección de regiones de texto/cotas (``detect_text_regions``) mediante
+     morfología de cierre + criterios de relación de aspecto y densidad de tinta.
+  5. Consulta al VLM para estimación de escala métrica (``extract_scale``).
+     El VLM usa ``role="vision"`` con imagen adjunta en base64 (corrección del bug
+     documentado en CHANGELOG [Unreleased] — antes usaba ``role="chat"`` sin imagen).
+
+Invariante: ninguna función de este módulo modifica el IFC ni alimenta al solver
+directamente. Todo output es "borrador pendiente de revisión humana" (ADR 0012).
+"""
 
 from __future__ import annotations
 
@@ -158,10 +176,11 @@ async def extract_scale(img: ImageArray, vlm_client: Any) -> float | None:
 
     image_base64 = base64.b64encode(encoded.tobytes()).decode("ascii")
     prompt = (
-        "Analiza este plano arquitectónico. Busca una barra de escala, cotas o cualquier "
-        "referencia dimensional visible. Devuelve SOLO JSON con una de estas claves: "
-        "`meters_per_pixel` o `pixels_per_meter`. Si no puedes estimarlo de forma fiable, "
-        "usa null."
+        "Analyze this architectural floor plan. Find any scale bar, dimension line, or "
+        "measurement reference visible in the image. "
+        "Return ONLY valid JSON with one of these keys: "
+        "`meters_per_pixel` (float) or `pixels_per_meter` (float). "
+        "If you cannot estimate reliably, return {\"meters_per_pixel\": null}."
     )
 
     if hasattr(vlm_client, "extract_scale"):
@@ -173,7 +192,7 @@ async def extract_scale(img: ImageArray, vlm_client: Any) -> float | None:
     elif hasattr(vlm_client, "chat"):
         messages = [{"role": "user", "content": prompt, "images": [image_base64]}]
         try:
-            response = vlm_client.chat(messages=messages, role="chat")
+            response = vlm_client.chat(messages=messages, role="vision", format="json")
         except TypeError:
             response = vlm_client.chat(messages=messages)
     else:

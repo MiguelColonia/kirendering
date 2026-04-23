@@ -1,4 +1,20 @@
-"""Entrypoint FastAPI de la Fase 4."""
+"""
+Entrypoint principal de la API FastAPI de Cimiento.
+
+Responsabilidades de este módulo:
+- Fábrica de aplicación ``create_app`` (inyectable en tests con parámetros distintos).
+- Lifespan: inicializa y cierra el motor de base de datos, el cliente Ollama,
+  el cliente Qdrant y el grafo LangGraph en el startup/shutdown de la app.
+- Middleware de errores localizado: traduce códigos de error internos al alemán
+  antes de enviarlos al frontend.
+- Registro de routers: projects, generation, downloads, renders, health,
+  chat (WebSocket), vision y diffusion.
+
+Nota sobre el timeout de OllamaClient (300 s):
+  El modelo ``qwen2.5vl:7b`` (6 GB) puede tardar ~120 s en cargarse en frío
+  en GPU AMD RX 6600. Con el timeout por defecto de 60 s el primer request
+  fallaba con ReadTimeout. Se fija en 300 s como margen seguro.
+"""
 
 from __future__ import annotations
 
@@ -65,7 +81,7 @@ def create_app(
             async with engine.begin() as connection:
                 await connection.run_sync(Base.metadata.create_all)
 
-        chat_client = OllamaClient(settings=settings)
+        chat_client = OllamaClient(settings=settings, timeout=300.0)
         app.state.chat_client = chat_client
 
         qdrant = AsyncQdrantClient(
@@ -158,7 +174,3 @@ def create_app(
 
 
 app = create_app()
-# La función create_app se encarga de inicializar y configurar la aplicación FastAPI,
-# incluyendo la configuración de middlewares, routers, y recursos compartidos como
-# clientes de chat y bases de datos. Esta función devuelve una instancia de FastAPI
-# lista para ser utilizada.

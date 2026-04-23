@@ -1,4 +1,10 @@
 """
+Pipeline de render fotorrealista headless para Cimiento (capa Render, ADR 0014).
+
+Flujo completo:
+  IFC (canónico) → geometría OBJ (este módulo, vía ifcopenshell)
+               → Blender Cycles headless (subprocess) → PNG(s)
+
 Pipeline de render headless: IFC → OBJ (ifcopenshell) → Blender subprocess → PNG.
 
 División de responsabilidades:
@@ -419,6 +425,7 @@ def run_render(config: RenderConfig) -> RenderResult:
 
         stdout = result.stdout or ""
         stderr = result.stderr or ""
+        combined_output = f"{stdout}\n{stderr}"
 
         if result.returncode != 0:
             logger.error("Blender stderr:\n%s", stderr[-2000:])
@@ -426,13 +433,20 @@ def run_render(config: RenderConfig) -> RenderResult:
                 f"Blender terminó con código {result.returncode}. Últimas líneas:\n{stderr[-800:]}"
             )
 
-        blender_version = _parse_blender_version(stderr)
+        if "Traceback (most recent call last):" in combined_output:
+            logger.error("Blender reportó una excepción aunque devolvió código 0:\n%s", stderr)
+            raise RuntimeError(
+                "Blender ejecutó el script con errores internos. Últimas líneas:\n"
+                f"{combined_output[-800:]}"
+            )
+
+        blender_version = _parse_blender_version(combined_output)
         views, device_used = _parse_render_results(stdout, output_dir)
 
         if not views:
             warnings.append(
-                "No se detectaron líneas RENDER_VIEW en el output de Blender. "
-                "Los PNGs pueden existir pero no se pudieron medir los tiempos."
+                "Keine RENDER_VIEW-Zeilen in der Blender-Ausgabe gefunden. "
+                "PNG-Dateien können vorhanden sein, Zeitangaben konnten jedoch nicht ermittelt werden."
             )
             # Intento de recuperación: listar PNGs generados
             for png in sorted(output_dir.glob("*.png")):

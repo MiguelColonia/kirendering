@@ -2,7 +2,12 @@
 
 ## 1. Contexto del proyecto
 
-Cimiento es un copiloto local de anteproyecto residencial orientado al mercado alemán. Combina razonamiento conversacional con Ollama + LangGraph, optimización espacial determinista con OR-Tools CP-SAT, generación BIM abierta con IfcOpenShell, consulta normativa con Qdrant y visualización fotorrealista a partir del IFC.
+Cimiento es un copiloto local de anteproyecto, visualización e iteración de diseño asistido por IA, desarrollado específicamente para un despacho de arquitectura especializado en infraestructuras sanitarias complejas (hospitales, clínicas y centros de investigación oncológica).
+
+El sistema integra un motor de diseño avanzado que combina razonamiento conversacional con Ollama y LangGraph, optimización espacial determinista con OR-Tools CP-SAT, generación BIM abierta con IfcOpenShell y consulta normativa especializada a través de Qdrant.
+
+A nivel gráfico, utiliza flujos de trabajo de generación condicional (Image-to-Image con control estructural / ControlNet) para transformar volumetrías extraídas del IFC o bocetos en renders fotorrealistas, respetando estrictamente las proporciones arquitectónicas. Además, incorpora herramientas de edición generativa interactiva (Inpainting y edición basada en instrucciones) que permiten al equipo de diseño y a los clientes iterar rápidamente sobre materiales, iluminación y distribución de fachadas o interiores clínicos directamente sobre la imagen renderizada. Todo este ecosistema está orquestado sobre una arquitectura propia de backend y frontend.
+
 
 El objetivo ya no es construir el producto base, sino mantener y evolucionar una **v1.0 funcional** sin romper sus contratos arquitectónicos.
 
@@ -37,6 +42,8 @@ Las capas superiores pueden invocar a las inferiores; nunca al revés.
 - **Docstrings en español; código en inglés.**
 - Tests con pytest. Los tests unitarios viven en `tests/unit/`; los de integración en `tests/integration/`.
 - No añadir dependencias sin justificar impacto técnico y operativo.
+- Metodología TDD: Al escribir nuevo código, aplica siempre la filosofía de Test-Driven Development. 
+- Resolución de Bugs: Nunca modifiques el código de producción directamente para arreglar un error. Primero, escribe un test que reproduzca exactamente el bug y comprueba que falla (rojo). Solo entonces, aplica la corrección necesaria para que el test pase (verde) sin romper el resto de la suite.
 
 ## 5. Idiomas de producto y documentación
 

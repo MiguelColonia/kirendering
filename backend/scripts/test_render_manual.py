@@ -23,10 +23,31 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
 from cimiento.render.blender_pipeline import run_render
+from cimiento.core.config import settings
 from cimiento.schemas.render import RenderConfig, RenderDevice
 
 _DEFAULT_IFC = Path(__file__).parents[1] / "data" / "outputs" / "rectangular_simple.ifc"
 _DEFAULT_OUT = Path(__file__).parents[1] / "data" / "outputs" / "renders"
+
+
+def _resolve_blender_executable(cli_value: str | None) -> Path:
+    if cli_value:
+        return Path(cli_value)
+    return Path(settings.blender_executable)
+
+
+def _build_render_config(args: argparse.Namespace) -> RenderConfig:
+    return RenderConfig(
+        ifc_path=args.ifc,
+        project_id="test_render_manual",
+        output_dir=_DEFAULT_OUT,
+        north_angle_deg=args.north_angle,
+        samples=args.samples,
+        device=RenderDevice(args.device),
+        render_width=2048,
+        render_height=1152,
+        blender_executable=_resolve_blender_executable(args.blender),
+    )
 
 
 def main() -> None:
@@ -40,6 +61,11 @@ def main() -> None:
         help="Dispositivo Cycles",
     )
     parser.add_argument("--north-angle", type=float, default=0.0, help="Ángulo norte grados")
+    parser.add_argument(
+        "--blender",
+        default=None,
+        help="Ruta al binario de Blender; por defecto usa BLENDER_EXECUTABLE/.env",
+    )
     args = parser.parse_args()
 
     if not args.ifc.exists():
@@ -53,18 +79,10 @@ def main() -> None:
     print(f"  Samples:   {args.samples}")
     print(f"  Device:    {args.device}")
     print(f"  Norte:     {args.north_angle}°")
+    print(f"  Blender:   {_resolve_blender_executable(args.blender)}")
     print()
 
-    config = RenderConfig(
-        ifc_path=args.ifc,
-        project_id="test_render_manual",
-        output_dir=_DEFAULT_OUT,
-        north_angle_deg=args.north_angle,
-        samples=args.samples,
-        device=RenderDevice(args.device),
-        render_width=2048,
-        render_height=1152,
-    )
+    config = _build_render_config(args)
 
     try:
         result = run_render(config)

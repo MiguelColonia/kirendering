@@ -25,6 +25,10 @@ from pathlib import Path
 import bpy
 from mathutils import Euler, Vector
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from blender_compat import choose_sky_haze_property, choose_sky_type
+
 # ---------------------------------------------------------------------------
 # Argumentos
 # ---------------------------------------------------------------------------
@@ -203,12 +207,18 @@ def setup_lighting(north_angle_deg: float) -> None:
     output = nt.nodes.new("ShaderNodeOutputWorld")
     bg = nt.nodes.new("ShaderNodeBackground")
     sky = nt.nodes.new("ShaderNodeTexSky")
-    sky.sky_type = "NISHITA"
+
+    sky_properties = sky.bl_rna.properties
+    sky_type_items = sky_properties["sky_type"].enum_items
+    sky.sky_type = choose_sky_type(item.identifier for item in sky_type_items)
     sky.sun_elevation = math.radians(42.0)  # ~sol de media mañana
     sky.sun_rotation = math.radians(-north_angle_deg)
     sky.altitude = 100.0
     sky.air_density = 1.0
-    sky.dust_density = 0.5
+
+    haze_property = choose_sky_haze_property(sky_properties.keys())
+    if haze_property is not None:
+        setattr(sky, haze_property, 0.5)
 
     bg.inputs["Strength"].default_value = 1.2
     output.location = (600, 0)
@@ -335,9 +345,24 @@ def setup_render_settings(cfg: dict, device_used: str) -> None:
     scene.render.image_settings.color_depth = "8"
 
     scene.cycles.samples = cfg["samples"]
-    scene.cycles.use_denoising = True
-    # Denoiser: OPENIMAGEDENOISE es CPU, OptiX es NVIDIA — usar OPENIMAGEDENOISE seguro
-    scene.cycles.denoiser = "OPENIMAGEDENOISE"
+
+    try:
+        denoiser_items = scene.cycles.bl_rna.properties["denoiser"].enum_items
+        supported_denoisers = {item.identifier for item in denoiser_items}
+    except Exception as exc:  # noqa: BLE001
+        print(f"Render denoiser warning: {exc}", file=sys.stderr)
+        supported_denoisers = set()
+
+    if "OPENIMAGEDENOISE" in supported_denoisers:
+        scene.cycles.use_denoising = True
+        scene.cycles.denoiser = "OPENIMAGEDENOISE"
+    else:
+        scene.cycles.use_denoising = False
+        print(
+            "Render denoiser warning: OPENIMAGEDENOISE no disponible; denoising desactivado.",
+            file=sys.stderr,
+        )
+
     scene.cycles.use_adaptive_sampling = True
     scene.cycles.adaptive_threshold = 0.01
     scene.cycles.preview_samples = 0

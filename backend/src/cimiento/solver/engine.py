@@ -1,4 +1,9 @@
-"""Motor de optimización espacial multi-planta con OR-Tools CP-SAT.
+"""
+Motor de optimización espacial multi-planta con OR-Tools CP-SAT (ADR 0001, ADR 0003).
+
+Este módulo es la capa más baja de lógica de negocio. Nunca es invocado
+directamente por el LLM — el agente ``invoke_solver`` construye Solar y Program
+desde los parámetros extraídos y llama a ``solve()``.
 
 Modelo actual (Fase 3):
 

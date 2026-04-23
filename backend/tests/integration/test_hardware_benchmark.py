@@ -207,9 +207,30 @@ class TestOllamaConnectivity:
 # ---------------------------------------------------------------------------
 
 
+def _ollama_unload_all() -> None:
+    """Descarga todos los modelos cargados en Ollama para liberar VRAM antes del benchmark."""
+    with suppress(Exception):
+        with httpx.Client(timeout=10.0) as client:
+            resp = client.get(f"{OLLAMA_BASE}/api/ps")
+            if resp.status_code != 200:
+                return
+            for model_info in resp.json().get("models", []):
+                name = model_info.get("name", "")
+                if name:
+                    with suppress(Exception):
+                        client.post(
+                            f"{OLLAMA_BASE}/api/generate",
+                            json={"model": name, "keep_alive": 0},
+                        )
+
+
 @pytest.mark.slow
 class TestOllamaBenchmark:
     """Mide latencias y throughput de los modelos principales."""
+
+    def setup_method(self, _method: object) -> None:
+        """Descarga modelos antes de cada test para evitar contención de VRAM."""
+        _ollama_unload_all()
 
     def _benchmark_model(
         self,
@@ -217,7 +238,15 @@ class TestOllamaBenchmark:
         prompt: str = "Sage mir kurz: wie viele Stockwerke hat ein Hochhaus?",
         n_runs: int = 1,
     ) -> dict[str, float]:
-        """Mide tiempo total y estima tokens generados."""
+        """Mide tiempo total y estima tokens generados.
+
+        Hace un calentamiento previo para que el modelo esté en VRAM antes de
+        iniciar el cronómetro — el threshold mide rendimiento de generación, no
+        de carga del modelo desde disco.
+        """
+        with suppress(Exception):
+            _ollama_chat_sync(model, "Hi")
+
         durations = []
         eval_counts = []
         for _ in range(n_runs):

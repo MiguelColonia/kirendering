@@ -1,25 +1,29 @@
 """
-Endpoints de chat conversacional para el copiloto de Cimiento.
+Router de chat conversacional del copiloto de Cimiento.
 
-POST   /api/projects/{project_id}/chat          — respuesta completa (non-streaming)
-WS     /api/projects/{project_id}/chat/stream   — progreso nodo a nodo + respuesta final
+Expone un único endpoint WebSocket:
+  WS /api/projects/{project_id}/chat/stream
+
+El cliente envía un primer JSON: {"message": "...", "thread_id": "..."}
+El servidor ejecuta el grafo LangGraph (design_assistant) en modo streaming
+y emite un evento por cada nodo que se activa, seguido de la respuesta final.
 
 Protocolo WebSocket (servidor → cliente):
   {"type": "node_start",  "node": "<nombre>", "label": "<texto alemán>"}
   {"type": "node_end",    "node": "<nombre>"}
   {"type": "done",        "response": "<texto>", "solution": {...} | null, "feasible": bool}
   {"type": "error",       "message": "<texto>"}
+
+El thread_id permite persistencia multi-turno vía el MemorySaver del grafo.
+Si no se provee, se genera uno automático basado en el project_id.
 """
 
 from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, Request, WebSocket, WebSocketDisconnect, status
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from cimiento.api.dependencies import get_repository
-from cimiento.api.errors import project_not_found
 from cimiento.persistence.repository import ProjectRepository
 
 logger = logging.getLogger(__name__)
@@ -36,33 +40,6 @@ _NODE_LABELS: dict[str, str] = {
 }
 
 _GRAPH_NODES = set(_NODE_LABELS.keys())
-
-
-# ---------------------------------------------------------------------------
-# Schemas de entrada / salida HTTP
-# ---------------------------------------------------------------------------
-
-
-class ChatRequest(BaseModel):
-    """Cuerpo de la petición POST /chat."""
-
-    message: str = Field(..., min_length=1, max_length=4096)
-    thread_id: str | None = Field(
-        default=None,
-        description=(
-            "Identificador de hilo para conversación multi-turno. "
-            "Si es null se usa '{project_id}-chat'."
-        ),
-    )
-
-
-class ChatResponse(BaseModel):
-    """Respuesta del endpoint POST /chat."""
-
-    response: str
-    thread_id: str
-    feasible: bool
-    solution: dict | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -86,49 +63,6 @@ def _extract_final_state(state: dict) -> tuple[str, bool, dict | None]:
     if solution:
         feasible = solution.get("status") in ("OPTIMAL", "FEASIBLE")
     return response, feasible, solution
-
-
-# ---------------------------------------------------------------------------
-# POST /api/projects/{project_id}/chat
-# ---------------------------------------------------------------------------
-
-
-@router.post(
-    "/projects/{project_id}/chat",
-    response_model=ChatResponse,
-    status_code=status.HTTP_200_OK,
-)
-async def chat(
-    project_id: str,
-    body: ChatRequest,
-    request: Request,
-    repository: ProjectRepository = Depends(get_repository),
-) -> ChatResponse:
-    """
-    Invoca el grafo de agentes con el mensaje del usuario y devuelve la respuesta completa.
-
-    Usa el mismo thread_id para toda la sesión de chat de un proyecto, lo que permite
-    conversación multi-turno con MemorySaver.
-    """
-    project = await repository.get_project(project_id)
-    if project is None:
-        raise project_not_found(project_id)
-
-    graph = request.app.state.chat_graph
-    tid = _thread_id(project_id, body.thread_id)
-
-    state = await graph.ainvoke(
-        {"user_message": body.message},
-        config={"configurable": {"thread_id": tid}},
-    )
-
-    response, feasible, solution = _extract_final_state(state)
-    return ChatResponse(
-        response=response,
-        thread_id=tid,
-        feasible=feasible,
-        solution=solution,
-    )
 
 
 # ---------------------------------------------------------------------------

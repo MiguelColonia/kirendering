@@ -242,6 +242,19 @@ async def stream_job(
     try:
         for event in backlog:
             await websocket.send_json(event)
+
+        # Drain events that arrived in the queue between subscribe() and the backlog snapshot
+        # to close the race window where the job finishes just before the terminal status check.
+        try:
+            while True:
+                event = queue.get_nowait()
+                await websocket.send_json(event)
+                if event["event"] in {"finished", "failed"}:
+                    await websocket.close()
+                    return
+        except asyncio.QueueEmpty:
+            pass
+
         if job.status in {"finished", "failed"}:
             await websocket.close()
             return

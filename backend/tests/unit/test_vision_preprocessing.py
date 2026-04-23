@@ -178,6 +178,7 @@ async def test_extract_scale_falls_back_to_chat_response() -> None:
             *,
             messages: list[dict[str, object]],
             role: str,
+            format: str | None = None,
         ) -> SimpleNamespace:
             self.messages = messages
             self.role = role
@@ -188,6 +189,6 @@ async def test_extract_scale_falls_back_to_chat_response() -> None:
     result = await extract_scale(image, client)
 
     assert result == pytest.approx(0.025)
-    assert client.role == "chat"
+    assert client.role == "vision"
     assert client.messages is not None
     assert client.messages[0]["images"]

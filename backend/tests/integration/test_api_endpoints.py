@@ -256,6 +256,7 @@ def test_patch_program_creates_new_version_with_updated_floors(
     updated = patch_response.json()
     assert updated["current_version"]["version_number"] == 2
     assert updated["current_version"]["program"]["num_floors"] == 3
+    assert updated["updated_at"] > initial["updated_at"]
     solar_original = initial["current_version"]["solar"]
     solar_updated = updated["current_version"]["solar"]
     assert solar_updated["id"] == solar_original["id"]

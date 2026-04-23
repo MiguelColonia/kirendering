@@ -489,9 +489,9 @@ async def combine_preprocessing_and_vlm(
     meters_per_pixel = await extract_scale(img, vlm_client)
     if meters_per_pixel is None:
         warnings.append(
-            "No se encontró barra de escala ni referencia dimensional. "
-            "Las coordenadas en píxeles no pueden convertirse a metros. "
-            "draft_building será None."
+            "Kein Maßstabsbalken oder Bemaßungsreferenz gefunden. "
+            "Pixelkoordinaten können nicht in Meter umgerechnet werden. "
+            "draft_building wird None sein."
         )
 
     symbols = await identify_symbols(img, vlm_client)
@@ -500,12 +500,12 @@ async def combine_preprocessing_and_vlm(
 
     if not symbols:
         warnings.append(
-            "El VLM no detectó ningún símbolo arquitectónico (puertas, ventanas, etc.)."
+            "Das VLM hat keine Architektursymbole erkannt (Türen, Fenster usw.)."
         )
     if not labels:
-        warnings.append("No se reconocieron etiquetas de estancias en el plano.")
+        warnings.append("Im Grundriss wurden keine Raumbeschriftungen erkannt.")
     if not room_regions:
-        warnings.append("El VLM no identificó ninguna región de estancia en el plano.")
+        warnings.append("Das VLM hat keine Raumbereiche im Grundriss identifiziert.")
 
     interpretation = PlanInterpretation(
         image_path=str(path.resolve()),
@@ -522,8 +522,8 @@ async def combine_preprocessing_and_vlm(
     draft = _build_draft_building(interpretation, project_id=project_id, solar_id=solar_id)
     if draft is None and meters_per_pixel is not None:
         warnings.append(
-            "No se pudo construir un Building borrador: "
-            "datos insuficientes (sin estancias ni muros válidos tras conversión)."
+            "Kein Gebäudeentwurf konnte erstellt werden: "
+            "unzureichende Daten (keine gültigen Räume oder Wände nach der Konvertierung)."
         )
 
     return PlanInterpretation(

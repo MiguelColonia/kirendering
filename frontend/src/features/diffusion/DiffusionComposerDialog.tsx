@@ -1,3 +1,21 @@
+/**
+ * DiffusionComposerDialog — diálogo modal para lanzar un job de difusión generativa.
+ *
+ * Tres modos disponibles (ADR 0016):
+ *   img2img_controlnet_depth  — SD 1.5 + ControlNet depth; preserva la volumetría del edificio.
+ *   img2img_controlnet_canny  — SD 1.5 + ControlNet canny; preserva los bordes/líneas.
+ *   instruct_pix2pix          — InstructPix2Pix; edición guiada por instrucción de texto.
+ *
+ * Máquina de estados de la UI (phase):
+ *   compose → processing → done
+ *           ↘            ↗ error
+ *
+ * El negative_prompt se oculta en modo pix2pix porque InstructPix2Pix ignora ese parámetro.
+ *
+ * La imagen de referencia (initialImageUrl) se descarga como Blob para poder enviarla
+ * como multipart/form-data al endpoint POST /api/projects/{id}/diffusion. El objeto URL
+ * se revoca al desmontar para evitar memory leaks.
+ */
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, FileImage, Loader2, Sparkles, X } from "lucide-react";
@@ -52,13 +70,24 @@ export function DiffusionComposerDialog({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+  const blobPreviewRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (blobPreviewRef.current) {
+        URL.revokeObjectURL(blobPreviewRef.current);
+      }
+    };
+  }, []);
 
   const [phase, setPhase] = useState<Phase>("compose");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [imageLoadError, setImageLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!initialImageUrl) return;
+    setImageLoadError(null);
     setPreview(initialImageUrl);
     fetch(initialImageUrl)
       .then((res) => res.blob())
@@ -66,8 +95,11 @@ export function DiffusionComposerDialog({
         const filename = initialImageUrl.split("/").pop() ?? "source.png";
         setFile(new File([blob], filename, { type: blob.type || "image/png" }));
       })
-      .catch(() => {});
-  }, [initialImageUrl]);
+      .catch(() => {
+        setPreview(null);
+        setImageLoadError(t("diffusion.compose.image_load_error"));
+      });
+  }, [initialImageUrl, t]);
   const [mode, setMode] = useState<DiffusionMode>("img2img_controlnet_depth");
   const [prompt, setPrompt] = useState("");
   const [negativePrompt, setNegativePrompt] = useState("");
@@ -119,8 +151,13 @@ export function DiffusionComposerDialog({
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0] ?? null;
     if (!picked) return;
+    if (blobPreviewRef.current) {
+      URL.revokeObjectURL(blobPreviewRef.current);
+    }
+    const url = URL.createObjectURL(picked);
+    blobPreviewRef.current = url;
     setFile(picked);
-    setPreview(URL.createObjectURL(picked));
+    setPreview(url);
   }
 
   async function handleSubmit() {
@@ -220,6 +257,17 @@ export function DiffusionComposerDialog({
               </div>
 
               {/* Image upload */}
+              {imageLoadError ? (
+                <div className="flex items-start gap-2 rounded-[1rem] border border-amber-200 bg-amber-50 p-4">
+                  <AlertTriangle
+                    size={16}
+                    className="mt-0.5 shrink-0 text-amber-500"
+                  />
+                  <p className="text-xs leading-6 text-amber-700">
+                    {imageLoadError}
+                  </p>
+                </div>
+              ) : null}
               <div
                 className="flex cursor-pointer flex-col items-center gap-3 rounded-[1.5rem] border-2 border-dashed border-[color:var(--color-line)] bg-white/60 p-8 transition hover:border-[color:var(--color-accent)]"
                 onClick={() => inputRef.current?.click()}

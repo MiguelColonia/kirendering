@@ -459,4 +459,4 @@ async def test_combine_preprocessing_and_vlm_no_scale_produces_none_building(
 
     assert result.draft_building is None
     assert result.meters_per_pixel is None
-    assert any("escala" in w.lower() or "scale" in w.lower() for w in result.warnings)
+    assert any("maßstab" in w.lower() or "scale" in w.lower() for w in result.warnings)

@@ -1,4 +1,18 @@
-"""Schemas Pydantic específicos de la capa API."""
+"""
+Schemas Pydantic de la capa API de Cimiento.
+
+Estos schemas son exclusivos de la interfaz HTTP/WebSocket; no pertenecen
+a los schemas de dominio (``cimiento.schemas``). Separan el contrato de API
+del modelo interno para poder evolucionar ambos de forma independiente.
+
+Grupos:
+  - Requests de proyecto (create, update, patch program/solar)
+  - Requests de render y difusión
+  - Responses de job (start, status, eventos WebSocket)
+  - Responses de galería (renders y difusión)
+  - Responses de visión (plan interpreter)
+  - Health check
+"""
 
 from __future__ import annotations
 
@@ -136,7 +150,7 @@ class RenderGalleryItemResponse(BaseModel):
     project_id: str
     version_id: str
     version_number: int
-    view: str
+    view: Literal["exterior", "interior"]
     prompt: str | None = None
     image_url: str
     download_url: str
@@ -218,7 +232,7 @@ class DiffusionGalleryItemResponse(BaseModel):
     project_id: str
     version_id: str
     version_number: int
-    mode: str
+    mode: DiffusionMode
     prompt: str | None = None
     image_url: str
     download_url: str

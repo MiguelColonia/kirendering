@@ -53,6 +53,10 @@ Ruta recomendada de instalación:
 5. Si se va a usar Ollama con GPU AMD, aplicar el override de servicio con `sudo bash scripts/setup_ollama_gpu.sh`.
 6. Ejecutar una primera verificación funcional: proyecto, generación, visor IFC, chat, visión y render/difusión.
 
+### Manual de uso
+
+El manual operativo bilingüe para usuario final está en [docs/manual-usuario.md](docs/manual-usuario.md).
+
 ### Arquitectura
 
 Cimiento separa estrictamente razonamiento, optimización y materialización BIM; el resumen arquitectónico está en [docs/architecture/README.md](docs/architecture/README.md).
@@ -121,6 +125,10 @@ Empfohlene Reihenfolge:
 4. Entwicklungs- oder Produktionsstack nach [infra/docker/README.md](infra/docker/README.md) starten.
 5. Fuer AMD-GPU-Offloading in Ollama den Service-Override mit `sudo bash scripts/setup_ollama_gpu.sh` anwenden.
 6. Einen ersten End-to-End-Test fuer Projekt, Generierung, IFC-Viewer, Chat, Vision sowie Render/Diffusion ausfuehren.
+
+### Benutzerhandbuch
+
+Das operative, zweisprachige Benutzerhandbuch fuer die taegliche Nutzung liegt in [docs/manual-usuario.md](docs/manual-usuario.md).
 
 ### Architektur
 

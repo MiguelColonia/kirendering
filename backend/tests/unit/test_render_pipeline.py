@@ -9,6 +9,7 @@ backend/scripts/test_render_manual.py.
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,7 @@ from cimiento.render.blender_pipeline import (
     _parse_render_results,
     compute_cameras,
     extract_geometry_to_obj,
+    run_render,
 )
 from cimiento.schemas.render import RenderConfig, RenderDevice, RenderResult, RenderView
 
@@ -293,3 +295,111 @@ class TestParseRenderResults:
         stdout = "RENDER_VIEW exterior_34 bad_number\n"
         views, _ = _parse_render_results(stdout, tmp_path)
         assert views[0].duration_seconds == 0.0
+
+
+class TestRunRenderProcessHandling:
+    def test_raises_when_blender_writes_traceback_with_zero_exit_code(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        ifc = tmp_path / "model.ifc"
+        ifc.write_text("stub")
+
+        monkeypatch.setattr(
+            "cimiento.render.blender_pipeline._find_blender",
+            lambda executable: Path("/usr/bin/blender"),
+        )
+        monkeypatch.setattr(
+            "cimiento.render.blender_pipeline.extract_geometry_to_obj",
+            lambda ifc_path, obj_path: {
+                "min": [0.0, 0.0, 0.0],
+                "max": [10.0, 10.0, 10.0],
+                "center": [5.0, 5.0, 5.0],
+            },
+        )
+        monkeypatch.setattr(
+            "cimiento.render.blender_pipeline.compute_cameras",
+            lambda bbox, north_angle_deg: [
+                {
+                    "name": "exterior_34",
+                    "position": [0.0, 0.0, 5.0],
+                    "target": [0.0, 0.0, 0.0],
+                    "lens_mm": 35.0,
+                }
+            ],
+        )
+        monkeypatch.setattr(
+            "cimiento.render.blender_pipeline.subprocess.run",
+            lambda *args, **kwargs: SimpleNamespace(
+                returncode=0,
+                stdout="RENDER_DEVICE CPU\n",
+                stderr=(
+                    "Traceback (most recent call last):\n"
+                    "TypeError: enum 'OPENIMAGEDENOISE' not found in ()\n"
+                ),
+            ),
+        )
+
+        config = RenderConfig(
+            ifc_path=ifc,
+            project_id="p1",
+            output_dir=tmp_path,
+        )
+
+        with pytest.raises(RuntimeError, match="errores internos"):
+            run_render(config)
+
+    def test_reads_blender_version_from_stdout_when_stderr_is_empty(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        ifc = tmp_path / "model.ifc"
+        ifc.write_text("stub")
+
+        monkeypatch.setattr(
+            "cimiento.render.blender_pipeline._find_blender",
+            lambda executable: Path("/usr/bin/blender"),
+        )
+        monkeypatch.setattr(
+            "cimiento.render.blender_pipeline.extract_geometry_to_obj",
+            lambda ifc_path, obj_path: {
+                "min": [0.0, 0.0, 0.0],
+                "max": [10.0, 10.0, 10.0],
+                "center": [5.0, 5.0, 5.0],
+            },
+        )
+        monkeypatch.setattr(
+            "cimiento.render.blender_pipeline.compute_cameras",
+            lambda bbox, north_angle_deg: [
+                {
+                    "name": "exterior_34",
+                    "position": [0.0, 0.0, 5.0],
+                    "target": [0.0, 0.0, 0.0],
+                    "lens_mm": 35.0,
+                }
+            ],
+        )
+        monkeypatch.setattr(
+            "cimiento.render.blender_pipeline.subprocess.run",
+            lambda *args, **kwargs: SimpleNamespace(
+                returncode=0,
+                stdout=(
+                    "Blender 4.0.2\n"
+                    "RENDER_VIEW exterior_34 1.2\n"
+                    "RENDER_DEVICE CPU\n"
+                ),
+                stderr="",
+            ),
+        )
+
+        config = RenderConfig(
+            ifc_path=ifc,
+            project_id="p1",
+            output_dir=tmp_path,
+        )
+
+        result = run_render(config)
+
+        assert result.blender_version == "4.0.2"

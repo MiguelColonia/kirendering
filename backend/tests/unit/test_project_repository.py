@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
@@ -165,3 +167,98 @@ async def test_generated_output_crud_and_project_delete_cascade(
     assert await repository.get_project(project.id) is None
     assert await repository.get_project_version(version.id) is None
     assert await repository.get_generated_output(output.id) is None
+
+
+@pytest.mark.asyncio
+async def test_project_updated_at_changes_when_creating_new_version(
+    repository: ProjectRepository,
+    sample_solar_rectangular,
+    sample_typology_t2: Typology,
+) -> None:
+    project = await repository.create_project(name="Proyecto timestamp")
+    created_at = project.updated_at
+
+    await repository.create_project_version(
+        project.id,
+        solar=sample_solar_rectangular,
+        program=_sample_program(sample_typology_t2),
+    )
+
+    refreshed_project = await repository.get_project(project.id)
+
+    assert refreshed_project is not None
+    assert refreshed_project.updated_at > created_at
+
+
+@pytest.mark.asyncio
+async def test_project_updated_at_changes_when_version_or_outputs_change(
+    repository: ProjectRepository,
+    sample_solar_rectangular,
+    sample_typology_t2: Typology,
+) -> None:
+    project = await repository.create_project(name="Proyecto timestamp outputs")
+    version = await repository.create_project_version(
+        project.id,
+        solar=sample_solar_rectangular,
+        program=_sample_program(sample_typology_t2),
+    )
+    after_version = (await repository.get_project(project.id)).updated_at
+
+    updated_version = await repository.update_project_version(
+        version.id,
+        solution=_sample_solution(),
+    )
+    assert updated_version is not None
+
+    after_solution = (await repository.get_project(project.id)).updated_at
+    assert after_solution > after_version
+
+    await repository.create_generated_output(
+        version.id,
+        output_type="IFC",
+        file_path="data/outputs/timestamp.ifc",
+        media_type="application/x-step",
+    )
+
+    after_output = (await repository.get_project(project.id)).updated_at
+    assert after_output > after_solution
+
+
+@pytest.mark.asyncio
+async def test_concurrent_version_creation_assigns_unique_numbers(
+    tmp_path,
+    sample_solar_rectangular,
+    sample_typology_t2: Typology,
+) -> None:
+    engine = create_engine_from_url(f"sqlite+aiosqlite:///{tmp_path / 'concurrent-versions.db'}")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+    repository = ProjectRepository(session_factory)
+
+    try:
+        project = await repository.create_project(name="Proyecto concurrente")
+        program = _sample_program(sample_typology_t2).model_copy(
+            update={"project_id": project.id}
+        )
+
+        first, second = await asyncio.gather(
+            repository.create_project_version(
+                project.id,
+                solar=sample_solar_rectangular,
+                program=program,
+            ),
+            repository.create_project_version(
+                project.id,
+                solar=sample_solar_rectangular,
+                program=program,
+            ),
+        )
+
+        assert sorted([first.version_number, second.version_number]) == [1, 2]
+
+        versions = await repository.list_project_versions(project.id)
+        assert [version.version_number for version in versions] == [1, 2]
+    finally:
+        await engine.dispose()

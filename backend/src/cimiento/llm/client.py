@@ -1,4 +1,20 @@
-"""Cliente async para Ollama con resolución de modelos por rol."""
+"""
+Cliente async para Ollama con resolución de modelos por rol (ADR 0008).
+
+Abstrae la API HTTP de Ollama en una interfaz de alto nivel que asigna
+automáticamente el modelo correcto según el rol del agente que llama.
+
+Mapeo de roles a modelos (configurable en Settings):
+  planner/validator/normative → qwen2.5:14b-instruct-q4_K_M  (razonamiento)
+  extractor/requirements/simple/chat → qwen2.5:7b-instruct-q4_K_M  (rápido)
+  coder → qwen2.5-coder:7b-instruct-q4_K_M
+  vision → qwen2.5vl:7b  (VLM multimodal)
+  (embed se configura aparte; usa nomic-embed-text)
+
+El cliente es lazy: el httpx.AsyncClient se crea en el primer request,
+no en el constructor. Esto permite instanciar OllamaClient en el startup
+de FastAPI antes de que el event loop esté disponible.
+"""
 
 from __future__ import annotations
 

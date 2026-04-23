@@ -28,35 +28,36 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Phase 4 / Weboberfläche",
-      "title": "Wohnprojekte präzise anlegen, versionieren und weiterführen.",
-      "description": "Cimiento bündelt Projektanlage, Grundstücksdaten und den Einstieg in die weitere Bearbeitung in einer zurückhaltenden Oberfläche für ein Architekturbüro.",
+      "eyebrow": "Lokaler Wohnungsentwurfs-Copilot",
+      "title": "Vom Raumprogramm zum fotorealistischen Entwurf — lokal und vollständig unter Kontrolle.",
+      "description": "Cimiento führt Grundstückseingabe, Layoutoptimierung, BIM-Erzeugung, Normabfrage, Planinterpretation und Rendering in einer Oberfläche zusammen. Alle Projektdaten bleiben im eigenen Büro.",
       "primary_action": "Neues Projekt",
       "secondary_action": "Projektliste öffnen"
     },
     "cards": {
       "create": {
-        "title": "Schneller Projektstart",
-        "description": "Ein neues Projekt wird mit einem belastbaren Startsatz aus Grundstück und Wohnprogramm angelegt und sofort im System versioniert."
+        "title": "Vollständige Entwurfspipeline",
+        "description": "Grundstück und Raumprogramm definieren, Grundriss mit OR-Tools optimieren, IFC-Modell erzeugen, Normvorschriften abfragen und Präsentationsrenderings generieren — alles in einem Arbeitsablauf."
       },
       "list": {
         "title": "Klarer Projektbestand",
-        "description": "Alle Projekte liegen in einer nüchternen Übersicht mit Erstellungsdatum, Status und direktem Zugang zum Editor."
+        "description": "Alle Projekte liegen in einer übersichtlichen Liste mit Status, Versionsverlauf und direktem Zugang zum Editor, Viewer und zur Rendergalerie."
       }
     },
     "highlights": {
-      "eyebrow": "Arbeitsmodus",
-      "body": "Die erste Ausbaustufe konzentriert sich auf Projektanlage und Bestandspflege. Der eigentliche Editor folgt im nächsten Schritt, die Navigation und Datenbasis sind dafür bereits stabil vorbereitet."
+      "eyebrow": "v 1.0 — Vollständiger Arbeitsablauf",
+      "body": "Cimiento deckt den gesamten Vorentwurfsprozess ab: Raumprogramm und Grundstück eingeben, Grundriss deterministisch optimieren, IFC-Modell und Exporte erzeugen, lokale Normvorschriften mit Quellenangabe abfragen, Bestandspläne unter menschlicher Prüfung interpretieren und fotorealistische Renderings sowie KI-gestützte Bildvarianten aus dem IFC-Modell erzeugen."
     },
     "metrics": {
-      "projects_label": "Projektstart",
-      "projects_value": "01 Klick",
-      "workflow_label": "Statusmodell",
-      "workflow_value": "Entwurf zuerst"
+      "projects_label": "Datenhaltung",
+      "projects_value": "100 % lokal",
+      "workflow_label": "IFC-Export",
+      "workflow_value": "Automatisch"
     }
   },
   "projects": {
     "list": {
+      "eyebrow": "Projektbestand",
       "title": "Projekte",
       "description": "Gespeicherte Projekte aus dem Backend mit Status, Erstellungsdatum und direktem Zugang zum Editor.",
       "search_placeholder": "Nach Projektname suchen",
@@ -77,10 +78,10 @@
     },
     "status": {
       "draft": "Entwurf",
-      "feasible": "Lösbar",
-      "optimal": "Optimiert",
-      "infeasible": "Nicht lösbar",
-      "timeout": "Zeitlimit",
+      "feasible": "Grundriss erzeugt",
+      "optimal": "Grundriss optimiert",
+      "infeasible": "Keine Lösung",
+      "timeout": "Berechnung abgebrochen",
       "error": "Fehler",
       "unknown": "Unbekannt"
     }
@@ -110,10 +111,11 @@
     "save_error": "Projekt konnte nicht gespeichert werden.",
     "back_to_list": "Zur Projektliste",
     "description_fallback": "Noch keine Projektbeschreibung hinterlegt.",
-    "render_gallery": "Render öffnen",
+    "render_gallery": "Rendergalerie",
     "delete_project": "Projekt löschen",
     "delete_pending": "Projekt wird gelöscht…",
     "delete_confirm": "Soll das Projekt „{{name}}“ wirklich gelöscht werden? Dieser Schritt kann nicht rückgängig gemacht werden.",
+    "delete_confirm_action": "Ja, unwiderruflich löschen",
     "delete_error": "Das Projekt konnte nicht gelöscht werden.",
     "version_label": "Version {{count}}",
     "meta": {
@@ -141,8 +143,6 @@
     "zoom_reset": "Zoom zurücksetzen",
     "grid_snap": "Rasterfang",
     "north_label": "Nordausrichtung",
-    "osm_import": "OSM-Import",
-    "osm_todo": "Der Import aus OpenStreetMap folgt in einer späteren Ausbaustufe.",
     "save_success": "Das Grundstück wurde als neue Projektversion gespeichert.",
     "save_error": "Das Grundstück konnte nicht gespeichert werden.",
     "save_invalid": "Das Grundstück ist noch nicht gültig. Prüfen Sie Eckpunkte, Fläche und Selbstüberschneidungen.",
@@ -510,6 +510,7 @@
       "mode_label": "Modus",
       "upload_action": "Datei auswählen oder hier ablegen",
       "upload_hint": "PNG, JPG, JPEG, WEBP oder TIF",
+      "image_load_error": "Das Referenzbild konnte nicht geladen werden. Bitte wählen Sie eine andere Datei.",
       "prompt_label": "Beschreibung / Anweisung",
       "prompt_placeholder": "z. B. «Fotorealistisches Rendering mit Sichtbeton-Fassade und warmem Abendlicht»",
       "negative_prompt_label": "Negativ-Prompt (optional)",

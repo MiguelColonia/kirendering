@@ -2,7 +2,7 @@
 name = "cimiento"
 version = "0.1.0"
 description = "Copiloto local de anteproyecto residencial"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 dependencies = [
     # Core
     "fastapi>=0.115.0",
@@ -40,8 +40,13 @@ dependencies = [
     # Difusión (opcional en entornos sin GPU; los imports son lazy)
     "Pillow>=10.0.0",
     "diffusers>=0.27.0",
-    "transformers>=4.40.0",
+    "transformers>=4.41.0,<5.0.0",
     "accelerate>=0.29.0",
+    # PyTorch — build ROCm 5.7 para AMD RX 6600 (HSA_OVERRIDE_GFX_VERSION=10.3.0)
+    # Las tres versiones deben moverse juntas. Fuente: pytorch-rocm index.
+    "torch==2.3.1",
+    "torchvision==0.18.1",
+    "torchaudio==2.3.1",
 ]
 
 [project.optional-dependencies]
@@ -66,6 +71,19 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
 ignore = ["B008"]
+
+[[tool.uv.index]]
+name = "pytorch-rocm"
+url = "https://download.pytorch.org/whl/rocm5.7"
+
+[tool.uv]
+environments = ["sys_platform == 'linux'"]
+index-strategy = "unsafe-best-match"
+
+[tool.uv.sources]
+torch = { index = "pytorch-rocm" }
+torchvision = { index = "pytorch-rocm" }
+torchaudio = { index = "pytorch-rocm" }
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

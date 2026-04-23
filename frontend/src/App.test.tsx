@@ -18,7 +18,9 @@ vi.mock("./pages/ProjectListPage", () => ({
     showCreateDialog = false,
   }: {
     showCreateDialog?: boolean;
-  }) => <div>{showCreateDialog ? "projects-page-create" : "projects-page"}</div>,
+  }) => (
+    <div>{showCreateDialog ? "projects-page-create" : "projects-page"}</div>
+  ),
 }));
 
 vi.mock("./pages/ProjectEditorPage", () => ({
@@ -43,6 +45,20 @@ describe("App", () => {
     expect(screen.getByText("nav.projects")).toBeInTheDocument();
     expect(await screen.findByText("projects-page-create")).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("de");
+  });
+
+  it("markiert auf /projekte/neu nur den Link für das neue Projekt als aktiv", async () => {
+    window.history.pushState({}, "", "/projekte/neu");
+
+    render(<App />);
+
+    expect(await screen.findByText("projects-page-create")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "nav.new_project" }),
+    ).toHaveAttribute("aria-current", "page");
+    expect(
+      screen.getByRole("link", { name: "nav.projects" }),
+    ).not.toHaveAttribute("aria-current", "page");
   });
 
   it("leitet unbekannte Routen auf die Landingpage um", async () => {

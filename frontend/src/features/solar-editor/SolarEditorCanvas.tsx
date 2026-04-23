@@ -1,3 +1,22 @@
+/**
+ * SolarEditorCanvas — canvas interactivo para definir el polígono del solar (Grundstück).
+ *
+ * Sistema de coordenadas:
+ *   - Espacio mundo (metros): X→ derecha, Y↑ arriba (igual que IFC/solver).
+ *   - Espacio canvas (píxeles Konva): X→ derecha, Y↓ abajo.
+ *   - ``toCanvas`` y ``fromCanvas`` hacen la conversión, invirtiendo el eje Y.
+ *
+ * Snap a rejilla: todos los vértices se encajan al múltiplo más próximo de ``snapStep``
+ * para garantizar que el polígono entregado al solver tiene coordenadas alineadas.
+ *
+ * Zoom: factor multiplicativo sobre el autoescalado inicial; rango [0.25, 4.0].
+ * El autoescalado (``computeAutoScale``) ajusta el polígono para que quepa en el
+ * canvas con PADDING de 60 px en cada borde.
+ *
+ * Flecha norte: dibujada en esquina superior izquierda. ``northAngleDeg`` es el
+ * ángulo de la orientación norte respecto al eje Y del mundo; se usa en el render
+ * Blender para calcular las posiciones de cámara exterior (ADR 0014).
+ */
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Circle, Layer, Line, Stage, Text } from "react-konva";
 import { Minus, Plus, RotateCcw } from "lucide-react";
@@ -458,17 +477,6 @@ export function SolarEditorCanvas({
               angleDeg={northAngleDeg}
               onChange={onNorthAngleChange}
             />
-          </div>
-
-          {/* OSM Import (TODO) */}
-          <div className="rounded-[1.5rem] border border-dashed border-[color:var(--color-line)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-mist)]">
-              {t("solar_editor.osm_import")}
-            </p>
-            <p className="mt-2 text-xs leading-5 text-[color:var(--color-mist)]">
-              {/* TODO Fase futura: importar contorno desde OpenStreetMap */}
-              {t("solar_editor.osm_todo")}
-            </p>
           </div>
         </div>
       </div>

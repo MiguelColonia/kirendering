@@ -90,7 +90,7 @@ definido para uso en producción.
 
 ```
 AUTO detección:
-1. ¿torch.version.hip no es None? → LOCAL GPU (ROCm)
+1. ¿torch.version.hip no es None y torch.cuda.is_available()? → LOCAL GPU (ROCm)
 2. ¿torch.cuda.is_available()? → LOCAL GPU (NVIDIA)
 3. ¿REPLICATE_API_TOKEN en env? → CLOUD
 4. Fallback → LOCAL CPU con advertencia de tiempo
